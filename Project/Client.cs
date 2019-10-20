@@ -15,6 +15,7 @@ namespace BrainBlo
         {
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
+            private MessageProcessing messageProcessing { get; set; }
             public Client(Protocol protocol)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -40,20 +41,21 @@ namespace BrainBlo
 
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing)
             {
+                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
                         Task.Run(() =>
                         {
                             socket.Connect(host, port);
-                            ListenServer<M>(messageProcessing);
+                            ListenServer<M>();
                         });
                         break;
                     case ThreadType.Thread:
                         Thread thread = new Thread(() =>
                         {
                             socket.Connect(host, port);
-                            ListenServer<M>(messageProcessing);
+                            ListenServer<M>();
                         });
                         thread.Start();
                         break;
@@ -61,7 +63,7 @@ namespace BrainBlo
                 }
             }
 
-            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Connect<M>(IPAddress ipAddress, int port)
             {
                 switch (threadType)
                 {
@@ -69,21 +71,21 @@ namespace BrainBlo
                         Task.Run(() =>
                         {
                             socket.Connect(ipAddress, port);
-                            ListenServer<M>(messageProcessing);
+                            ListenServer<M>();
                         });
                         break;
                     case ThreadType.Thread:
                         Thread thread = new Thread(() =>
                         {
                             socket.Connect(ipAddress, port);
-                            ListenServer<M>(messageProcessing);
+                            ListenServer<M>();
                         });
                         thread.Start();
                         break;
 
                 }
             }
-            public void Connect(string host, int port, MessageProcessing messageProcessing)
+            public void Connect(string host, int port)
             {
                 switch (threadType)
                 {
@@ -91,14 +93,14 @@ namespace BrainBlo
                         Task.Run(() =>
                         {
                             socket.Connect(host, port);
-                            ListenServer<string>(messageProcessing);
+                            ListenServer<string>();
                         });
                         break;
                     case ThreadType.Thread:
                         Thread thread = new Thread(() =>
                         {
                             socket.Connect(host, port);
-                            ListenServer<string>(messageProcessing);
+                            ListenServer<string>();
                         });
                         thread.Start();
                         break;
@@ -106,7 +108,7 @@ namespace BrainBlo
                 }
             }
 
-            public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Connect(IPAddress ipAddress, int port)
             {
                 switch (threadType)
                 {
@@ -114,14 +116,14 @@ namespace BrainBlo
                         Task.Run(() =>
                         {
                             socket.Connect(ipAddress, port);
-                            ListenServer<string>(messageProcessing);
+                            ListenServer<string>();
                         });
                         break;
                     case ThreadType.Thread:
                         Thread thread = new Thread(() =>
                         {
                             socket.Connect(ipAddress, port);
-                            ListenServer<string>(messageProcessing);
+                            ListenServer<string>();
                         });
                         thread.Start();
                         break;
@@ -129,7 +131,7 @@ namespace BrainBlo
                 }
             }
 
-            private void ListenServer<M>(MessageProcessing messageProcessing)
+            private void ListenServer<M>()
             {
                 int messageSize;
                 string fullMessage = string.Empty;

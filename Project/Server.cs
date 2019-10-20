@@ -52,35 +52,36 @@ namespace BrainBlo
 
             public void ListenClients<M>(MessageProcessing messageProcessing)
             {
+                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
-                        Task.Run(() => AcceptClients<M>(messageProcessing));
+                        Task.Run(() => AcceptClients<M>());
                         break;
                     case ThreadType.Thread:
-                        Thread thread = new Thread(() => AcceptClients<M>(messageProcessing));
+                        Thread thread = new Thread(() => AcceptClients<M>());
                         thread.Start();
                         break;
                 }
               
             }
 
-            public void ListenClients(MessageProcessing messageProcessing)
+            public void ListenClients()
             {
                 switch (threadType)
                 {
                     case ThreadType.Task:
-                        Task.Run(() => AcceptClients<string>(messageProcessing));
+                        Task.Run(() => AcceptClients<string>());
                         break;
                     case ThreadType.Thread:
-                        Thread thread = new Thread(() => AcceptClients<string>(messageProcessing));
+                        Thread thread = new Thread(() => AcceptClients<string>());
                         thread.Start();
                         break;
                 }
 
             }
 
-            private void AcceptClients<M>(MessageProcessing messageProcessing)
+            private void AcceptClients<M>()
             {
 
                 socket.Listen(0);
@@ -89,17 +90,17 @@ namespace BrainBlo
                     switch (threadType)
                     {
                         case ThreadType.Task:
-                            Task.Run(() => ClientHandler<M>(socket.Accept(), messageProcessing));
+                            Task.Run(() => ClientHandler<M>(socket.Accept()));
                             break;
                         case ThreadType.Thread:
-                            Thread thread = new Thread(() => ClientHandler<M>(socket.Accept(), messageProcessing));
+                            Thread thread = new Thread(() => ClientHandler<M>(socket.Accept()));
                             thread.Start();
                             break;
                     }
                 }
             }
 
-            private void ClientHandler<M>(Socket clientSocket, MessageProcessing messageProcessing)
+            private void ClientHandler<M>(Socket clientSocket)
             {
                 int messageSize = 0;
                 string fullMessage = string.Empty;
