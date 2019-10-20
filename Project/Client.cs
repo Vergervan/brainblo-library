@@ -16,6 +16,7 @@ namespace BrainBlo
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
+            private List<Exception> exceptionsStorage = new List<Exception>();
             public Client(Protocol protocol)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -42,123 +43,162 @@ namespace BrainBlo
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing)
             {
                 this.messageProcessing = messageProcessing;
-                switch (threadType)
+                try
                 {
-                    case ThreadType.Task:
-                        Task.Run(() =>
-                        {
-                            socket.Connect(host, port);
-                            ListenServer<M>();
-                        });
-                        break;
-                    case ThreadType.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            socket.Connect(host, port);
-                            ListenServer<M>();
-                        });
-                        thread.Start();
-                        break;
+                    switch (threadType)
+                    {
+                        case ThreadType.Task:
+                            Task.Run(() =>
+                            {
+                                socket.Connect(host, port);
+                                ListenServer<M>();
+                            });
+                            break;
+                        case ThreadType.Thread:
+                            Thread thread = new Thread(() =>
+                            {
+                                socket.Connect(host, port);
+                                ListenServer<M>();
+                            });
+                            thread.Start();
+                            break;
 
+                    }
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
                 }
             }
 
-            public void Connect<M>(IPAddress ipAddress, int port)
+            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
             {
-                switch (threadType)
+                this.messageProcessing = messageProcessing;
+                try
                 {
-                    case ThreadType.Task:
-                        Task.Run(() =>
-                        {
-                            socket.Connect(ipAddress, port);
-                            ListenServer<M>();
-                        });
-                        break;
-                    case ThreadType.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            socket.Connect(ipAddress, port);
-                            ListenServer<M>();
-                        });
-                        thread.Start();
-                        break;
+                    switch (threadType)
+                    {
+                        case ThreadType.Task:
+                            Task.Run(() =>
+                            {
+                                socket.Connect(ipAddress, port);
+                                ListenServer<M>();
+                            });
+                            break;
+                        case ThreadType.Thread:
+                            Thread thread = new Thread(() =>
+                            {
+                                socket.Connect(ipAddress, port);
+                                ListenServer<M>();
+                            });
+                            thread.Start();
+                            break;
 
+                    }
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
                 }
             }
-            public void Connect(string host, int port)
+            public void Connect(string host, int port, MessageProcessing messageProcessing)
             {
-                switch (threadType)
+                this.messageProcessing = messageProcessing;
+                try
                 {
-                    case ThreadType.Task:
-                        Task.Run(() =>
-                        {
-                            socket.Connect(host, port);
-                            ListenServer<string>();
-                        });
-                        break;
-                    case ThreadType.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            socket.Connect(host, port);
-                            ListenServer<string>();
-                        });
-                        thread.Start();
-                        break;
+                    switch (threadType)
+                    {
+                        case ThreadType.Task:
+                            Task.Run(() =>
+                            {
+                                socket.Connect(host, port);
+                                ListenServer<string>();
+                            });
+                            break;
+                        case ThreadType.Thread:
+                            Thread thread = new Thread(() =>
+                            {
+                                socket.Connect(host, port);
+                                ListenServer<string>();
+                            });
+                            thread.Start();
+                            break;
 
+                    }
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
                 }
             }
 
-            public void Connect(IPAddress ipAddress, int port)
+            public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
             {
-                switch (threadType)
+                this.messageProcessing = messageProcessing;
+                try
                 {
-                    case ThreadType.Task:
-                        Task.Run(() =>
-                        {
-                            socket.Connect(ipAddress, port);
-                            ListenServer<string>();
-                        });
-                        break;
-                    case ThreadType.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            socket.Connect(ipAddress, port);
-                            ListenServer<string>();
-                        });
-                        thread.Start();
-                        break;
+                    switch (threadType)
+                    {
+                        case ThreadType.Task:
+                            Task.Run(() =>
+                            {
+                                socket.Connect(ipAddress, port);
+                                ListenServer<string>();
+                            });
+                            break;
+                        case ThreadType.Thread:
+                            Thread thread = new Thread(() =>
+                            {
+                                socket.Connect(ipAddress, port);
+                                ListenServer<string>();
+                            });
+                            thread.Start();
+                            break;
 
+                    }
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
                 }
             }
 
             private void ListenServer<M>()
             {
-                int messageSize;
-                string fullMessage = string.Empty;
-                byte[] messageBuffer = new byte[1024];
-                do
+                try
                 {
-                    messageSize = socket.Receive(messageBuffer);
-                    fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
-                } while (socket.Available > 0);
-                List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
-                lock (byteArrays)
-                {
-                    foreach (var c in byteArrays)
+                    while (true)
                     {
-                        object message = default;
-                        if (typeof(M) != typeof(string))
+                        int messageSize;
+                        string fullMessage = string.Empty;
+                        byte[] messageBuffer = new byte[1024];
+                        do
                         {
-                            message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(c.bytes));
-                        }
-                        else
+                            messageSize = socket.Receive(messageBuffer);
+                            fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
+                        } while (socket.Available > 0);
+                        List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
+                        lock (byteArrays)
                         {
-                            message = Encoding.UTF8.GetString(c.bytes);
-                        }
-                        messageProcessing(message, messageBuffer, fullMessage, messageSize);
-                    }
+                            foreach (var c in byteArrays)
+                            {
+                                object message = default;
+                                if (typeof(M) != typeof(string))
+                                {
+                                    message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(c.bytes));
+                                }
+                                else
+                                {
+                                    message = Encoding.UTF8.GetString(c.bytes);
+                                }
+                                messageProcessing(new MessageInfo(exceptionsStorage.ToArray(), message, messageSize, messageBuffer, fullMessage));
+                            }
 
+                        }
+                        fullMessage = string.Empty;
+                        exceptionsStorage = new List<Exception>();
+                    }
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
                 }
+
             }
         }
     }

@@ -16,6 +16,7 @@ namespace BrainBlo
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
+            private List<Exception> exceptionsStorage = new List<Exception>();
 
             public Server(Protocol protocol)
             {
@@ -36,8 +37,14 @@ namespace BrainBlo
 
             public void Send(Socket client, byte[] messageBuffer)
             {
-                byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                client.Send(messageBytes);
+                try
+                {
+                    byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
+                    client.Send(messageBytes);
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
+                }
             }
 
             public void Start(string ipAddress, int port)
@@ -66,8 +73,9 @@ namespace BrainBlo
               
             }
 
-            public void ListenClients()
+            public void ListenClients(MessageProcessing messageProcessing)
             {
+                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
@@ -83,7 +91,7 @@ namespace BrainBlo
 
             private void AcceptClients<M>()
             {
-
+                
                 socket.Listen(0);
                 while (true)
                 {
@@ -109,20 +117,26 @@ namespace BrainBlo
                 {
                     while (true)
                     {
-                        do
+                        try
                         {
-                            messageSize = clientSocket.Receive(messageBuffer);
+                            do
+                            {
+                                messageSize = clientSocket.Receive(messageBuffer);
 
-                            fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
-                        } while (clientSocket.Available > 0);
+                                fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
+                            } while (clientSocket.Available > 0);
+                        }catch(Exception e)
+                        {
+                            exceptionsStorage.Add(e);
+                        }
 
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
 
+                        object message = default;
                         lock (byteArrays)
                         {
                             foreach (var c in byteArrays)
                             {
-                                object message = default;
                                 if (typeof(M) != typeof(string))
                                 {
                                     message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(c.bytes));
@@ -131,15 +145,17 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(c.bytes);
                                 }
-                                messageProcessing(message, messageBuffer, fullMessage, messageSize);
+                                messageProcessing(new MessageInfo(exceptionsStorage.ToArray(), message, messageSize, messageBuffer, fullMessage));
                             }
                         }
                         fullMessage = string.Empty;
+                        exceptionsStorage = new List<Exception>();
                     }
                 }catch(Exception e)
                 {
-                    Console.WriteLine("CH:" + e.Message);
+                    exceptionsStorage.Add(e);
                 }
+
             }
         }
     }
