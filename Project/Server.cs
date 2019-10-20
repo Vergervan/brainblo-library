@@ -11,19 +11,6 @@ namespace BrainBlo
 {
     namespace Network
     {
-        public enum Protocol
-        {
-            TCP = 0,
-        }
-
-        public enum ThreadType
-        {
-            Thread = 0,
-            Task = 1
-        }
-
-        public delegate void MessageProcessing(params object[] o);
-
         public class Server
         {
             private Socket socket { get; set; }
