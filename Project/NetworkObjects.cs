@@ -35,5 +35,8 @@ namespace BrainBlo
             Task = 1
         }
         public delegate void MessageProcessing(MessageInfo messageInfo);
+        public delegate void StartProcessing();
+        public delegate void ListenProcessing();
+        public delegate void AcceptProcessing();
     }
 }

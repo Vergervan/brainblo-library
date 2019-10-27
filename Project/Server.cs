@@ -16,6 +16,9 @@ namespace BrainBlo
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
+            public event StartProcessing OnServerStart;
+            public event ListenProcessing OnServerListen;
+            public event AcceptProcessing OnServerAccept;
             private List<Exception> exceptionsStorage = new List<Exception>();
 
             public Server(Protocol protocol)
@@ -45,16 +48,20 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+
+                CheckException();
             }
 
             public void Start(string ipAddress, int port)
             {
-                socket.Bind(new IPEndPoint(long.Parse(ipAddress), port));
+                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
+                OnServerStart?.Invoke();
             }
 
             public void Start(IPAddress ipAddress, int port)
             {
                 socket.Bind(new IPEndPoint(ipAddress, port));
+                OnServerStart?.Invoke();
             }
 
             public void ListenClients<M>(MessageProcessing messageProcessing)
@@ -70,7 +77,7 @@ namespace BrainBlo
                         thread.Start();
                         break;
                 }
-              
+                OnServerListen?.Invoke();
             }
 
             public void ListenClients(MessageProcessing messageProcessing)
@@ -86,7 +93,7 @@ namespace BrainBlo
                         thread.Start();
                         break;
                 }
-
+                OnServerListen?.Invoke();
             }
 
             private void AcceptClients<M>()
@@ -110,6 +117,7 @@ namespace BrainBlo
 
             private void ClientHandler<M>(Socket clientSocket)
             {
+                OnServerAccept?.Invoke();
                 int messageSize = 0;
                 string fullMessage = string.Empty;
                 byte[] messageBuffer = new byte[1024];
@@ -117,18 +125,12 @@ namespace BrainBlo
                 {
                     while (true)
                     {
-                        try
+                        do
                         {
-                            do
-                            {
-                                messageSize = clientSocket.Receive(messageBuffer);
+                            messageSize = clientSocket.Receive(messageBuffer);
 
-                                fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
-                            } while (clientSocket.Available > 0);
-                        }catch(Exception e)
-                        {
-                            exceptionsStorage.Add(e);
-                        }
+                            fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
+                        } while (clientSocket.Available > 0);
 
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
 
@@ -145,18 +147,33 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(c.bytes);
                                 }
-                                messageProcessing(new MessageInfo(exceptionsStorage.ToArray(), message, messageSize, messageBuffer, fullMessage));
+                                messageProcessing?.Invoke(new MessageInfo(exceptionsStorage.ToArray(), message, messageSize, messageBuffer, fullMessage));
                             }
                         }
                         fullMessage = string.Empty;
                         exceptionsStorage = new List<Exception>();
                     }
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     exceptionsStorage.Add(e);
                 }
-
+                CheckException();
             }
+
+            private void CheckException()
+            {
+                if(exceptionsStorage.Count > 0)
+                {
+                    lock (exceptionsStorage)
+                    {
+                        foreach(var c in exceptionsStorage)
+                        {
+                            Console.WriteLine(c.Message);
+                        }
+                    }
+                }
+            } 
         }
     }
 }

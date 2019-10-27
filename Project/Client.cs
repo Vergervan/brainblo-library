@@ -37,7 +37,14 @@ namespace BrainBlo
             public void Send(byte[] messageBuffer)
             {
                 byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                socket.Send(messageBytes);
+                try
+                {
+                    socket.Send(messageBytes);
+                }catch(Exception e)
+                {
+                    exceptionsStorage.Add(e);
+                }
+                CheckException();
             }
 
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing)
@@ -68,6 +75,7 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+                CheckException();
             }
 
             public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -98,6 +106,7 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+                CheckException();
             }
             public void Connect(string host, int port, MessageProcessing messageProcessing)
             {
@@ -127,6 +136,7 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+                CheckException();
             }
 
             public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -157,6 +167,7 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+                CheckException();
             }
 
             private void ListenServer<M>()
@@ -198,7 +209,21 @@ namespace BrainBlo
                 {
                     exceptionsStorage.Add(e);
                 }
+                CheckException();
+            }
 
+            private void CheckException()
+            {
+                if (exceptionsStorage.Count > 0)
+                {
+                    lock (exceptionsStorage)
+                    {
+                        foreach (var c in exceptionsStorage)
+                        {
+                            Console.WriteLine(c.Message);
+                        }
+                    }
+                }
             }
         }
     }
