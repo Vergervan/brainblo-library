@@ -16,6 +16,10 @@ namespace BrainBlo
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
+            public event StartProcessing OnServerStart;
+            public event ListenProcessing OnServerListen;
+            public event AcceptProcessing OnServerAccept;
+            public ExceptionList exceptionList = new ExceptionList();
 
             public Server(Protocol protocol)
             {
@@ -36,71 +40,82 @@ namespace BrainBlo
 
             public void Send(Socket client, byte[] messageBuffer)
             {
-                byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                client.Send(messageBytes);
+                try
+                {
+                    byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
+                    client.Send(messageBytes);
+                }catch(Exception e)
+                {
+                    CheckException(e);
+                }
             }
 
             public void Start(string ipAddress, int port)
             {
-                socket.Bind(new IPEndPoint(long.Parse(ipAddress), port));
+                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
+                OnServerStart?.Invoke();
             }
 
             public void Start(IPAddress ipAddress, int port)
             {
                 socket.Bind(new IPEndPoint(ipAddress, port));
+                OnServerStart?.Invoke();
             }
 
             public void ListenClients<M>(MessageProcessing messageProcessing)
             {
+                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
-                        Task.Run(() => AcceptClients<M>(messageProcessing));
+                        Task.Run(() => AcceptClients<M>());
                         break;
                     case ThreadType.Thread:
-                        Thread thread = new Thread(() => AcceptClients<M>(messageProcessing));
+                        Thread thread = new Thread(() => AcceptClients<M>());
                         thread.Start();
                         break;
                 }
-              
+                OnServerListen?.Invoke();
             }
 
             public void ListenClients(MessageProcessing messageProcessing)
             {
+                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
-                        Task.Run(() => AcceptClients<string>(messageProcessing));
+                        Task.Run(() => AcceptClients<string>());
                         break;
                     case ThreadType.Thread:
-                        Thread thread = new Thread(() => AcceptClients<string>(messageProcessing));
+                        Thread thread = new Thread(() => AcceptClients<string>());
                         thread.Start();
                         break;
                 }
-
+                OnServerListen?.Invoke();
             }
 
-            private void AcceptClients<M>(MessageProcessing messageProcessing)
+            private void AcceptClients<M>()
             {
-
+                
                 socket.Listen(0);
                 while (true)
                 {
                     switch (threadType)
                     {
                         case ThreadType.Task:
-                            Task.Run(() => ClientHandler<M>(socket.Accept(), messageProcessing));
+                            Task.Run(() => ClientHandler<M>(socket.Accept()));
                             break;
                         case ThreadType.Thread:
-                            Thread thread = new Thread(() => ClientHandler<M>(socket.Accept(), messageProcessing));
+                            Thread thread = new Thread(() => ClientHandler<M>(socket.Accept()));
                             thread.Start();
                             break;
                     }
                 }
             }
 
-            private void ClientHandler<M>(Socket clientSocket, MessageProcessing messageProcessing)
+            private void ClientHandler<M>(Socket clientSocket)
             {
+                OnServerAccept?.Invoke(clientSocket);
                 int messageSize = 0;
                 string fullMessage = string.Empty;
                 byte[] messageBuffer = new byte[1024];
@@ -117,11 +132,11 @@ namespace BrainBlo
 
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
 
+                        object message = default;
                         lock (byteArrays)
                         {
                             foreach (var c in byteArrays)
                             {
-                                object message = default;
                                 if (typeof(M) != typeof(string))
                                 {
                                     message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(c.bytes));
@@ -130,15 +145,21 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(c.bytes);
                                 }
-                                messageProcessing(message, messageBuffer, fullMessage, messageSize);
+                                messageProcessing?.Invoke(new MessageInfo(message, messageSize, messageBuffer, fullMessage));
                             }
                         }
                         fullMessage = string.Empty;
                     }
-                }catch(Exception e)
-                {
-                    Console.WriteLine("CH:" + e.Message);
                 }
+                catch (Exception e)
+                {
+                    CheckException(e);
+                }
+            }
+
+            private void CheckException(Exception exception)
+            {
+                exceptionList.FindAndInvokeException(exception);
             }
         }
     }
