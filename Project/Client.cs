@@ -16,7 +16,10 @@ namespace BrainBlo
             private Socket socket { get; set; }
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
-            private List<Exception> exceptionsStorage = new List<Exception>();
+            public event ConnectProcessing OnConnect;
+            public ExceptionList exceptionList = new ExceptionList();
+
+            
             public Client(Protocol protocol)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -42,9 +45,8 @@ namespace BrainBlo
                     socket.Send(messageBytes);
                 }catch(Exception e)
                 {
-                    exceptionsStorage.Add(e);
+                    CheckException(e);
                 }
-                CheckException();
             }
 
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing)
@@ -71,11 +73,12 @@ namespace BrainBlo
                             break;
 
                     }
-                }catch(Exception e)
-                {
-                    exceptionsStorage.Add(e);
+                    OnConnect?.Invoke();
                 }
-                CheckException();
+                catch(Exception e)
+                {
+                    CheckException(e);
+                }
             }
 
             public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -100,13 +103,12 @@ namespace BrainBlo
                             });
                             thread.Start();
                             break;
-
                     }
+                    OnConnect?.Invoke();
                 }catch(Exception e)
                 {
-                    exceptionsStorage.Add(e);
+                    CheckException(e);
                 }
-                CheckException();
             }
             public void Connect(string host, int port, MessageProcessing messageProcessing)
             {
@@ -130,13 +132,13 @@ namespace BrainBlo
                             });
                             thread.Start();
                             break;
-
                     }
-                }catch(Exception e)
-                {
-                    exceptionsStorage.Add(e);
+                    OnConnect?.Invoke();
                 }
-                CheckException();
+                catch(Exception e)
+                {
+                    CheckException(e);
+                }
             }
 
             public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -161,13 +163,13 @@ namespace BrainBlo
                             });
                             thread.Start();
                             break;
-
                     }
-                }catch(Exception e)
-                {
-                    exceptionsStorage.Add(e);
+                    OnConnect?.Invoke();
                 }
-                CheckException();
+                catch(Exception e)
+                {
+                    CheckException(e);
+                }
             }
 
             private void ListenServer<M>()
@@ -198,32 +200,21 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(c.bytes);
                                 }
-                                messageProcessing(new MessageInfo(exceptionsStorage.ToArray(), message, messageSize, messageBuffer, fullMessage));
+                                messageProcessing(new MessageInfo(message, messageSize, messageBuffer, fullMessage));
                             }
 
                         }
                         fullMessage = string.Empty;
-                        exceptionsStorage = new List<Exception>();
                     }
                 }catch(Exception e)
                 {
-                    exceptionsStorage.Add(e);
+                    CheckException(e);
                 }
-                CheckException();
             }
 
-            private void CheckException()
+            private void CheckException(Exception exception)
             {
-                if (exceptionsStorage.Count > 0)
-                {
-                    lock (exceptionsStorage)
-                    {
-                        foreach (var c in exceptionsStorage)
-                        {
-                            Console.WriteLine(c.Message);
-                        }
-                    }
-                }
+                exceptionList.FindAndInvokeException(exception);
             }
         }
     }
