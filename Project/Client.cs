@@ -37,7 +37,7 @@ namespace BrainBlo
                 return socket;
             }
 
-            public void Send(byte[] messageBuffer)
+            public void Send(byte[] messageBuffer, bool useExceptionList)
             {
                 byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
                 try
@@ -45,11 +45,12 @@ namespace BrainBlo
                     socket.Send(messageBytes);
                 }catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
 
-            public void Connect<M>(string host, int port, MessageProcessing messageProcessing)
+            public void Connect<M>(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
                 try
@@ -77,11 +78,12 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
 
-            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
                 try
@@ -107,10 +109,11 @@ namespace BrainBlo
                     OnConnect?.Invoke();
                 }catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
-            public void Connect(string host, int port, MessageProcessing messageProcessing)
+            public void Connect(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
                 try
@@ -137,11 +140,12 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
 
-            public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
                 try
@@ -168,7 +172,8 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
 

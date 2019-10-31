@@ -38,7 +38,7 @@ namespace BrainBlo
                 return socket;
             }
 
-            public void Send(Socket client, byte[] messageBuffer)
+            public void Send(Socket client, byte[] messageBuffer, bool useExceptionList)
             {
                 try
                 {
@@ -46,7 +46,8 @@ namespace BrainBlo
                     client.Send(messageBytes);
                 }catch(Exception e)
                 {
-                    CheckException(e);
+                    if (useExceptionList) CheckException(e);
+                    else throw e;
                 }
             }
 
