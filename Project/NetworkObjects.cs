@@ -11,7 +11,6 @@ namespace BrainBlo
     {
         public delegate void MessageProcessing(MessageInfo messageInfo);
         public delegate void StartProcessing();
-        public delegate void ListenProcessing();
         public delegate void AcceptProcessing(Socket socket);
         public delegate void ConnectProcessing();
         public delegate void ExceptionProcessing();

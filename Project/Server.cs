@@ -17,7 +17,6 @@ namespace BrainBlo
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
             public event StartProcessing OnServerStart;
-            public event ListenProcessing OnServerListen;
             public event AcceptProcessing OnServerAccept;
             public ExceptionList exceptionList = new ExceptionList();
 
@@ -51,21 +50,40 @@ namespace BrainBlo
                 }
             }
 
-            public void Start(string ipAddress, int port)
-            {
-                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
-                OnServerStart?.Invoke();
-            }
-
-            public void Start(IPAddress ipAddress, int port)
-            {
-                socket.Bind(new IPEndPoint(ipAddress, port));
-                OnServerStart?.Invoke();
-            }
-
-            public void ListenClients<M>(MessageProcessing messageProcessing)
+            public void Start(string ipAddress, int port, MessageProcessing messageProcessing)
             {
                 this.messageProcessing = messageProcessing;
+                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
+                ListenClients<string>();
+                OnServerStart?.Invoke();
+            }
+
+            public void Start(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            {
+                this.messageProcessing = messageProcessing;
+                socket.Bind(new IPEndPoint(ipAddress, port));
+                ListenClients<string>();
+                OnServerStart?.Invoke();
+            }
+
+            public void Start<M>(string ipAddress, int port, MessageProcessing messageProcessing)
+            {
+                this.messageProcessing = messageProcessing;
+                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
+                ListenClients<M>();
+                OnServerStart?.Invoke();
+            }
+
+            public void Start<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            {
+                this.messageProcessing = messageProcessing;
+                socket.Bind(new IPEndPoint(ipAddress, port));
+                ListenClients<M>();
+                OnServerStart?.Invoke();
+            }
+
+            public void ListenClients<M>()
+            {
                 switch (threadType)
                 {
                     case ThreadType.Task:
@@ -76,12 +94,10 @@ namespace BrainBlo
                         thread.Start();
                         break;
                 }
-                OnServerListen?.Invoke();
             }
 
-            public void ListenClients(MessageProcessing messageProcessing)
+            public void ListenClients()
             {
-                this.messageProcessing = messageProcessing;
                 switch (threadType)
                 {
                     case ThreadType.Task:
@@ -92,7 +108,6 @@ namespace BrainBlo
                         thread.Start();
                         break;
                 }
-                OnServerListen?.Invoke();
             }
 
             private void AcceptClients<M>()
