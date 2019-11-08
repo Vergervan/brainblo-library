@@ -43,16 +43,16 @@ namespace BrainBlo
 
         public struct ExceptionCell
         {
-            public Exception exception;
+            public Type exception;
             public ExceptionProcessing exceptionProcessing; 
 
-            public ExceptionCell(Exception exception)
+            public ExceptionCell(Type exception)
             {
                 this.exception = exception;
                 this.exceptionProcessing = null;
             }
 
-            public ExceptionCell(Exception exception, ExceptionProcessing exceptionProcessing)
+            public ExceptionCell(Type exception, ExceptionProcessing exceptionProcessing)
             {
                 this.exception = exception;
                 this.exceptionProcessing = exceptionProcessing;
@@ -74,13 +74,13 @@ namespace BrainBlo
             ExceptionCell[] exceptionArray = new ExceptionCell[0];
             
 
-            public void Add(Exception exception)
+            public void Add(Type exception)
             {
                 ExceptionCell[] newExceptionArray;
 
                 foreach(var exception_for in exceptionArray)
                 {
-                    if (exception.GetType() == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
+                    if (exception == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
                 }
 
                 if (exceptionArray.Length > 0)
@@ -101,7 +101,7 @@ namespace BrainBlo
                 exceptionArray = newExceptionArray;
             }
 
-            public void Add(Exception exception, ExceptionProcessing exceptionProcessing)
+            public void Add(Type exception, ExceptionProcessing exceptionProcessing)
             {
                 ExceptionCell[] newExceptionArray;
 
@@ -109,7 +109,7 @@ namespace BrainBlo
                 {
                     foreach (var exception_for in exceptionArray)
                     {
-                        if (exception.GetType() == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
+                        if (exception == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
                     }
 
                     newExceptionArray = new ExceptionCell[exceptionArray.Length + 1];
@@ -128,13 +128,13 @@ namespace BrainBlo
                 exceptionArray = newExceptionArray;
             }
 
-            public bool Remove(Exception exception)
+            public bool Remove(Type exception)
             {
                 if (exceptionArray.Length > 1)
                 {
                     for (int i = 0; i < exceptionArray.Length; i++)
                     {
-                        if (exception.GetType() == exceptionArray[i].exception.GetType())
+                        if (exception == exceptionArray[i].exception.GetType())
                         {
                             ExceptionCell[] newExceptionArray = new ExceptionCell[exceptionArray.Length - 1];
                             for (int j = 0, k = 0; j < exceptionArray.Length; j++, k++)
@@ -154,7 +154,7 @@ namespace BrainBlo
                 }
                 else if(exceptionArray.Length == 1)
                 {
-                    if(exception.GetType() == exceptionArray[0].exception.GetType())
+                    if(exception == exceptionArray[0].exception.GetType())
                     {
                         exceptionArray = new ExceptionCell[0];
                         return true;
@@ -163,25 +163,25 @@ namespace BrainBlo
                 return false;
             }
 
-            public bool FindException(Exception exception)
+            public bool FindException(Type exception)
             {
                 if (exceptionArray.Length > 0)
                 {
                     foreach (var exception_foreach in exceptionArray)
                     {
-                        if (exception.GetType() == exception_foreach.exception.GetType()) return true;
+                        if (exception == exception_foreach.exception.GetType()) return true;
                     }
                 }
                 return false;
             }
 
-            public void FindAndInvokeException(Exception exception)
+            public void FindAndInvokeException(Type exception)
             {
                 if (exceptionArray.Length > 0)
                 {
                     foreach (var exception_foreach in exceptionArray)
                     {
-                        if (exception.GetType() == exception_foreach.exception.GetType())
+                        if (exception == exception_foreach.exception.GetType())
                         {
                             exception_foreach.exceptionProcessing?.Invoke();
                             break;
@@ -190,7 +190,7 @@ namespace BrainBlo
                 }
             }
 
-            public Exception this[int index]
+            public Type this[int index]
             {
                 get
                 {

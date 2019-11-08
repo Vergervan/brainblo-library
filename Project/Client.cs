@@ -45,7 +45,7 @@ namespace BrainBlo
                     socket.Send(messageBytes);
                 }catch(Exception e)
                 {
-                    if (useExceptionList) CheckException(e);
+                    if (useExceptionList) CheckException(e.GetType());
                     else throw e;
                 }
             }
@@ -78,7 +78,7 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    if (useExceptionList) CheckException(e);
+                    if (useExceptionList) CheckException(e.GetType());
                     else throw e;
                 }
             }
@@ -109,7 +109,7 @@ namespace BrainBlo
                     OnConnect?.Invoke();
                 }catch(Exception e)
                 {
-                    if (useExceptionList) CheckException(e);
+                    if (useExceptionList) CheckException(e.GetType());
                     else throw e;
                 }
             }
@@ -140,7 +140,7 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    if (useExceptionList) CheckException(e);
+                    if (useExceptionList) CheckException(e.GetType());
                     else throw e;
                 }
             }
@@ -172,7 +172,7 @@ namespace BrainBlo
                 }
                 catch(Exception e)
                 {
-                    if (useExceptionList) CheckException(e);
+                    if (useExceptionList) CheckException(e.GetType());
                     else throw e;
                 }
             }
@@ -213,11 +213,11 @@ namespace BrainBlo
                     }
                 }catch(Exception e)
                 {
-                    CheckException(e);
+                    CheckException(e.GetType());
                 }
             }
 
-            private void CheckException(Exception exception)
+            private void CheckException(Type exception)
             {
                 exceptionList.FindAndInvokeException(exception);
             }
