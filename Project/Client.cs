@@ -37,17 +37,21 @@ namespace BrainBlo
                 return socket;
             }
 
-            public void Send(byte[] messageBuffer, bool useExceptionList)
+            public void Send(string message, bool useExceptionList)
             {
-                byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                try
+                Task.Run(() =>
                 {
-                    socket.Send(messageBytes);
-                }catch(Exception e)
-                {
-                    if (useExceptionList) CheckException(e.GetType());
-                    else throw e;
-                }
+                    byte[] messageBytes = Buffer.AddSplitter(Encoding.UTF8.GetBytes(message), 0);
+                    try
+                    {
+                        socket.Send(messageBytes);
+                    }
+                    catch (Exception e)
+                    {
+                        if (useExceptionList) CheckException(e.GetType());
+                        else throw e;
+                    }
+                });
             }
 
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)

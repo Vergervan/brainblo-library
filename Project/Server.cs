@@ -39,15 +39,19 @@ namespace BrainBlo
 
             public void Send(Socket client, byte[] messageBuffer, bool useExceptionList)
             {
-                try
+                Task.Run(() =>
                 {
-                    byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                    client.Send(messageBytes);
-                }catch(Exception e)
-                {
-                    if (useExceptionList) CheckException(e.GetType());
-                    else throw e;
-                }
+                    try
+                    {
+                        byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
+                        client.Send(messageBytes);
+                    }
+                    catch (Exception e)
+                    {
+                        if (useExceptionList) CheckException(e.GetType());
+                        else throw e;
+                    }
+                });
             }
 
             public void Start(string ipAddress, int port, MessageProcessing messageProcessing)
