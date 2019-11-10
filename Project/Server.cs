@@ -18,6 +18,8 @@ namespace BrainBlo
             private MessageProcessing messageProcessing { get; set; }
             public event StartProcessing OnServerStart;
             public event AcceptProcessing OnServerAccept;
+            public event ExceptionProcessing OnSendException;
+            public event ExceptionProcessing OnListenClientException;
             public ExceptionList exceptionList = new ExceptionList();
 
             public Server(Protocol protocol)
@@ -46,10 +48,10 @@ namespace BrainBlo
                         byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
                         client.Send(messageBytes);
                     }
-                    catch (Exception e)
+                    catch (Exception exception)
                     {
-                        if (useExceptionList) CheckException(e.GetType());
-                        else throw e;
+                        if (useExceptionList) CheckException(exception);
+                        else OnSendException?.Invoke(exception);
                     }
                 });
             }
@@ -155,15 +157,15 @@ namespace BrainBlo
                         object message = default;
                         lock (byteArrays)
                         {
-                            foreach (var c in byteArrays)
+                            foreach (var byteArray in byteArrays)
                             {
                                 if (typeof(M) != typeof(string))
                                 {
-                                    message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(c.bytes));
+                                    message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
                                 }
                                 else
                                 {
-                                    message = Encoding.UTF8.GetString(c.bytes);
+                                    message = Encoding.UTF8.GetString(byteArray.bytes);
                                 }
                                 messageProcessing?.Invoke(new MessageInfo(message, messageSize, messageBuffer, fullMessage));
                             }
@@ -171,15 +173,16 @@ namespace BrainBlo
                         fullMessage = string.Empty;
                     }
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
-                    CheckException(e.GetType());
+                    if (OnListenClientException != null) OnListenClientException(exception);
+                    else CheckException(exception);
                 }
             }
 
-            private void CheckException(Type exception)
+            private void CheckException(Exception exception)
             {
-                exceptionList.FindAndInvokeException(exception);
+                exceptionList.InvokeExceptionProcess(exception);
             }
         }
     }
