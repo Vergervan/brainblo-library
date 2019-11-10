@@ -68,6 +68,12 @@ namespace BrainBlo
                 exceptionArray[0] = new ExceptionCell { exception = typeof(Exception), exceptionProcessing = null };
             }
 
+            public ExceptionList(ExceptionProcessing defaultExceptionProcessing)
+            {
+                exceptionArray = new ExceptionCell[1];
+                exceptionArray[0] = new ExceptionCell { exception = typeof(Exception), exceptionProcessing = defaultExceptionProcessing };
+            }
+
             public void SetDefaultProcess(ExceptionProcessing exceptionProcessing)
             {
                 exceptionArray[0].exceptionProcessing = exceptionProcessing;
