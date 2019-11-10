@@ -46,58 +46,31 @@ namespace BrainBlo
             public Type exception;
             public ExceptionProcessing exceptionProcessing; 
 
-            public ExceptionCell(Type exception)
-            {
-                this.exception = exception;
-                this.exceptionProcessing = null;
-            }
-
             public ExceptionCell(Type exception, ExceptionProcessing exceptionProcessing)
             {
                 this.exception = exception;
                 this.exceptionProcessing = exceptionProcessing;
             }
         }
-        public class AlreadyInTheListException : Exception
+        public class ExceptionListException : Exception
         {
-            public override string Message { get; }
-            public AlreadyInTheListException() { }
-            public AlreadyInTheListException(string Message) : base(Message)
-            {
-                 this.Message = Message;
-            }
+            public ExceptionListException() { }
+            public ExceptionListException(string message) : base(message) { }
         }
 
         public class ExceptionList
         {
-            ExceptionCell[] exceptionArray = new ExceptionCell[0];
-            
+            ExceptionCell[] exceptionArray;
 
-            public void Add(Type exceptionType)
+            public ExceptionList()
             {
-                ExceptionCell[] newExceptionArray;
+                exceptionArray = new ExceptionCell[1];
+                exceptionArray[0] = new ExceptionCell { exception = typeof(Exception), exceptionProcessing = null };
+            }
 
-                foreach(var exception_for in exceptionArray)
-                {
-                    if (exceptionType == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
-                }
-
-                if (exceptionArray.Length > 0)
-                {
-                    newExceptionArray = new ExceptionCell[exceptionArray.Length + 1];
-                    for (int i = 0; i < exceptionArray.Length; i++)
-                    {
-                        newExceptionArray[i] = exceptionArray[i];
-                    }
-
-                    newExceptionArray[exceptionArray.Length] = new ExceptionCell(exceptionType);
-
-                    exceptionArray = newExceptionArray;
-                    return;
-                }
-                newExceptionArray = new ExceptionCell[1];
-                newExceptionArray[0] = new ExceptionCell(exceptionType);
-                exceptionArray = newExceptionArray;
+            public void SetDefaultProcess(ExceptionProcessing exceptionProcessing)
+            {
+                exceptionArray[0].exceptionProcessing = exceptionProcessing;
             }
 
             public void Add(Type exceptionType, ExceptionProcessing exceptionProcessing)
@@ -108,7 +81,7 @@ namespace BrainBlo
                 {
                     foreach (var exception_for in exceptionArray)
                     {
-                        if (exceptionType == exception_for.exception.GetType()) throw new AlreadyInTheListException("This type of exception already in the exception list");
+                        if (exceptionType == exception_for.exception.GetType()) throw new ExceptionListException("This type of exception already in the exception list");
                     }
 
                     newExceptionArray = new ExceptionCell[exceptionArray.Length + 1];
@@ -133,7 +106,7 @@ namespace BrainBlo
                 {
                     for (int i = 0; i < exceptionArray.Length; i++)
                     {
-                        if (exceptionType == exceptionArray[i].exception.GetType())
+                        if (exceptionType == exceptionArray[i].exception)
                         {
                             ExceptionCell[] newExceptionArray = new ExceptionCell[exceptionArray.Length - 1];
                             for (int j = 0, k = 0; j < exceptionArray.Length; j++, k++)
@@ -153,10 +126,9 @@ namespace BrainBlo
                 }
                 else if(exceptionArray.Length == 1)
                 {
-                    if(exceptionType == exceptionArray[0].exception.GetType())
+                    if(exceptionType == exceptionArray[0].exception)
                     {
-                        exceptionArray = new ExceptionCell[0];
-                        return true;
+                        throw new ExceptionListException("You can not remove a default exception");
                     }
                 }
                 return false;
@@ -178,27 +150,32 @@ namespace BrainBlo
             {
                 if (exceptionArray.Length > 0)
                 {
-                    foreach (var exception_foreach in exceptionArray)
+                    for(int i = 0; i<exceptionArray.Length; i++)
                     {
-                        if (exception.GetType() == exception_foreach.exception)
+                        if(i == exceptionArray.Length-1 && exception.GetType() != exceptionArray[i].exception)
                         {
-                            exception_foreach.exceptionProcessing?.Invoke(exception);
-                            break;
+                            exceptionArray[0].exceptionProcessing?.Invoke(exception);
+                            return;
+                        }
+
+                        if(exception.GetType() == exceptionArray[i].exception)
+                        {
+                            exceptionArray[i].exceptionProcessing?.Invoke(exception);
                         }
                     }
                 }
             }
 
-            public Type this[int index]
+            public ExceptionCell this[int index]
             {
                 get
                 {
-                    return exceptionArray[index].exception;
+                    return exceptionArray[index];
                 }
 
                 set
                 {
-                    exceptionArray[index].exception = value;
+                    exceptionArray[index] = value;
                 }
             }
 
