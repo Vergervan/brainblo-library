@@ -70,13 +70,14 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(host, port);
+                                OnConnect?.Invoke();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<M>();
                         });
                         break;
                     case ThreadType.Thread:
@@ -85,19 +86,19 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(host, port);
+                                OnConnect?.Invoke();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<M>();
                         });
                         thread.Start();
                         break;
 
                 }
-                OnConnect?.Invoke();
             }
 
             public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
@@ -111,13 +112,14 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(ipAddress, port);
+                                OnConnect?.Invoke();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<M>();
                         });
                         break;
                     case ThreadType.Thread:
@@ -126,19 +128,19 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(ipAddress, port);
+                                OnConnect?.Invoke();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<M>();
                         });
                         thread.Start();
                         break;
 
                 }
-                OnConnect?.Invoke();
             }
          
             public void Connect(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
@@ -152,13 +154,14 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(host, port);
+                                OnConnect?.Invoke();
+                                ListenServer<string>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<string>();
                         });
                         break;
                     case ThreadType.Thread:
@@ -167,19 +170,19 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(host, port);
+                                OnConnect?.Invoke();
+                                ListenServer<string>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<string>();
                         });
                         thread.Start();
                         break;
 
                 }
-                OnConnect?.Invoke();
             }
 
             public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
@@ -193,13 +196,14 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(ipAddress, port);
+                                OnConnect?.Invoke();
+                                ListenServer<string>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<string>();
                         });
                         break;
                     case ThreadType.Thread:
@@ -208,19 +212,19 @@ namespace BrainBlo
                             try
                             {
                                 socket.Connect(ipAddress, port);
+                                OnConnect?.Invoke();
+                                ListenServer<string>();
                             }
                             catch (Exception exception)
                             {
                                 if (useExceptionList) CheckException(exception);
                                 else OnConnectException?.Invoke(exception);
                             }
-                            ListenServer<string>();
                         });
                         thread.Start();
                         break;
 
                 }
-                OnConnect?.Invoke();
             }
 
             private void ListenServer<M>()
