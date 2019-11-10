@@ -168,7 +168,7 @@ namespace BrainBlo
                 {
                     foreach (var exception_foreach in exceptionArray)
                     {
-                        if (exception.GetType() == exception_foreach.exception.GetType()) return true;
+                        if (exception.GetType() == exception_foreach.exception) return true;
                     }
                 }
                 return false;
@@ -180,7 +180,7 @@ namespace BrainBlo
                 {
                     foreach (var exception_foreach in exceptionArray)
                     {
-                        if (exception.GetType() == exception_foreach.exception.GetType())
+                        if (exception.GetType() == exception_foreach.exception)
                         {
                             exception_foreach.exceptionProcessing?.Invoke(exception);
                             break;
