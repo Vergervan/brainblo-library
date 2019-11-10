@@ -31,5 +31,10 @@ namespace BrainBlo
             DataContractJsonSerializer jsonDerializer = new DataContractJsonSerializer(typeof(T));
             return (T)jsonDerializer.ReadObject(ms);
         }
+
+        public static Type GetType<T>()
+        {
+            return typeof(T);
+        }
     }
 }
