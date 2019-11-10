@@ -25,6 +25,11 @@ namespace BrainBlo
             Task = 1
         }
 
+        public interface INetworkObject
+        {
+            void NetworkEventDefinitions();
+        }
+
         public class MessageInfo
         {
             public object message { get; private set; }
