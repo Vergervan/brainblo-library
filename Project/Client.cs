@@ -17,6 +17,7 @@ namespace BrainBlo
             public ThreadType threadType { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
             public event ConnectProcessing OnConnect;
+            public event SendProcessing OnSend;
             public event ExceptionProcessing OnConnectException;
             public event ExceptionProcessing OnSendException;
             public event ExceptionProcessing OnServerListenException;
@@ -48,11 +49,13 @@ namespace BrainBlo
                     try
                     {
                         socket.Send(messageBytes);
-                    }catch(Exception exception)
+                    }
+                    catch(Exception exception)
                     {
                         if (useExceptionList) CheckException(exception);
                         else OnSendException?.Invoke(exception);
                     }
+                    OnSend?.Invoke();
                 });
             }
 

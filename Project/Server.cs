@@ -18,6 +18,7 @@ namespace BrainBlo
             private MessageProcessing messageProcessing { get; set; }
             public event StartProcessing OnServerStart;
             public event AcceptProcessing OnServerAccept;
+            public event SendProcessing OnSend;
             public event ExceptionProcessing OnSendException;
             public event ExceptionProcessing OnListenClientException;
             public ExceptionList exceptionList = new ExceptionList();
@@ -43,9 +44,9 @@ namespace BrainBlo
             {
                 Task.Run(() =>
                 {
+                    byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
                     try
                     {
-                        byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
                         client.Send(messageBytes);
                     }
                     catch (Exception exception)
@@ -53,6 +54,7 @@ namespace BrainBlo
                         if (useExceptionList) CheckException(exception);
                         else OnSendException?.Invoke(exception);
                     }
+                    OnSend?.Invoke();
                 });
             }
 
