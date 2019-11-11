@@ -171,6 +171,7 @@ namespace BrainBlo
                         if(exception.GetType() == exceptionArray[i].exception)
                         {
                             exceptionArray[i].exceptionProcessing?.Invoke(exception);
+                            return;
                         }
                     }
                 }
