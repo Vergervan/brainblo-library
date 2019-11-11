@@ -90,7 +90,7 @@ namespace BrainBlo
                 OnServerStart?.Invoke();
             }
 
-            public void ListenClients<M>()
+            private void ListenClients<M>()
             {
                 switch (asyncWay)
                 {
@@ -104,7 +104,7 @@ namespace BrainBlo
                 }
             }
 
-            public void ListenClients()
+            private void ListenClients()
             {
                 switch (asyncWay)
                 {
