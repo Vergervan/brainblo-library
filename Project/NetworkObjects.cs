@@ -9,7 +9,7 @@ namespace BrainBlo
 {
     namespace Network
     {
-        public delegate void MessageProcessing(MessageInfo messageInfo);
+        public delegate void MessageProcessing(MessageData messageData);
         public delegate void StartProcessing();
         public delegate void AcceptProcessing(Socket socket);
         public delegate void ConnectProcessing();
@@ -20,7 +20,7 @@ namespace BrainBlo
         {
             TCP = 0,
         }
-        public enum ThreadType
+        public enum AsyncWay
         {
             Thread = 0,
             Task = 1
@@ -31,18 +31,16 @@ namespace BrainBlo
             void NetworkEventDefinitions();
         }
 
-        public class MessageInfo
+        public class MessageData
         {
             public object message { get; private set; }
             public int messageSize { get; private set; }
-            public byte[] messageBuffer { get; private set; }
             public string fullMessage { get; private set; }
 
-            public MessageInfo(object message, int messageSize, byte[] messageBuffer, string fullMessage)
+            public MessageData(object message, int messageSize, string fullMessage)
             {
                 this.message = message;
                 this.messageSize = messageSize;
-                this.messageBuffer = messageBuffer;
                 this.fullMessage = fullMessage;
             }
         }

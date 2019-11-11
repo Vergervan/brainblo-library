@@ -14,7 +14,7 @@ namespace BrainBlo
         public class Server
         {
             private Socket socket { get; set; }
-            public ThreadType threadType { get; private set; }
+            public AsyncWay asyncWay { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
             public event StartProcessing OnServerStart;
             public event AcceptProcessing OnServerAccept;
@@ -26,13 +26,13 @@ namespace BrainBlo
             public Server(Protocol protocol)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                threadType = ThreadType.Task;
+                asyncWay = AsyncWay.Task;
             }
 
-            public Server(Protocol protocol, ThreadType threadType)
+            public Server(Protocol protocol, AsyncWay asyncWay)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this.threadType = threadType;
+                this.asyncWay = asyncWay;
             }
 
             public Socket GetSocket()
@@ -48,13 +48,13 @@ namespace BrainBlo
                     try
                     {
                         client.Send(messageBytes);
+                        OnSend?.Invoke();
                     }
                     catch (Exception exception)
                     {
                         if (useExceptionList) CheckException(exception);
                         else OnSendException?.Invoke(exception);
                     }
-                    OnSend?.Invoke();
                 });
             }
 
@@ -92,12 +92,12 @@ namespace BrainBlo
 
             public void ListenClients<M>()
             {
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() => AcceptClients<M>());
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() => AcceptClients<M>());
                         thread.Start();
                         break;
@@ -106,12 +106,12 @@ namespace BrainBlo
 
             public void ListenClients()
             {
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() => AcceptClients<string>());
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() => AcceptClients<string>());
                         thread.Start();
                         break;
@@ -124,12 +124,12 @@ namespace BrainBlo
                 socket.Listen(0);
                 while (true)
                 {
-                    switch (threadType)
+                    switch (asyncWay)
                     {
-                        case ThreadType.Task:
+                        case AsyncWay.Task:
                             Task.Run(() => ClientHandler<M>(socket.Accept()));
                             break;
-                        case ThreadType.Thread:
+                        case AsyncWay.Thread:
                             Thread thread = new Thread(() => ClientHandler<M>(socket.Accept()));
                             thread.Start();
                             break;
@@ -169,7 +169,7 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(byteArray.bytes);
                                 }
-                                messageProcessing?.Invoke(new MessageInfo(message, messageSize, messageBuffer, fullMessage));
+                                messageProcessing?.Invoke(new MessageData(message, messageSize, fullMessage));
                             }
                         }
                         fullMessage = string.Empty;

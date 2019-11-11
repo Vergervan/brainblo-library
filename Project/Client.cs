@@ -14,7 +14,7 @@ namespace BrainBlo
         public class Client
         {
             private Socket socket { get; set; }
-            public ThreadType threadType { get; private set; }
+            public AsyncWay asyncWay { get; private set; }
             private MessageProcessing messageProcessing { get; set; }
             public event ConnectProcessing OnConnect;
             public event SendProcessing OnSend;
@@ -27,13 +27,13 @@ namespace BrainBlo
             public Client(Protocol protocol)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                threadType = ThreadType.Task;
+                asyncWay = AsyncWay.Task;
             }
 
-            public Client(Protocol protocol, ThreadType threadType)
+            public Client(Protocol protocol, AsyncWay asyncWay)
             {
                 if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this.threadType = threadType;
+                this.asyncWay = asyncWay;
             }
 
             public Socket GetSocket()
@@ -49,22 +49,22 @@ namespace BrainBlo
                     try
                     {
                         socket.Send(messageBytes);
+                        OnSend?.Invoke();
                     }
                     catch(Exception exception)
                     {
                         if (useExceptionList) CheckException(exception);
                         else OnSendException?.Invoke(exception);
                     }
-                    OnSend?.Invoke();
                 });
             }
 
             public void Connect<M>(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() =>
                         {
                             try
@@ -80,7 +80,7 @@ namespace BrainBlo
                             }
                         });
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() =>
                         {
                             try
@@ -104,9 +104,9 @@ namespace BrainBlo
             public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() =>
                         {
                             try
@@ -122,7 +122,7 @@ namespace BrainBlo
                             }
                         });
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() =>
                         {
                             try
@@ -146,9 +146,9 @@ namespace BrainBlo
             public void Connect(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() =>
                         {
                             try
@@ -164,7 +164,7 @@ namespace BrainBlo
                             }
                         });
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() =>
                         {
                             try
@@ -188,9 +188,9 @@ namespace BrainBlo
             public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
                 this.messageProcessing = messageProcessing;
-                switch (threadType)
+                switch (asyncWay)
                 {
-                    case ThreadType.Task:
+                    case AsyncWay.Task:
                         Task.Run(() =>
                         {
                             try
@@ -206,7 +206,7 @@ namespace BrainBlo
                             }
                         });
                         break;
-                    case ThreadType.Thread:
+                    case AsyncWay.Thread:
                         Thread thread = new Thread(() =>
                         {
                             try
@@ -255,7 +255,7 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(byteArray.bytes);
                                 }
-                                messageProcessing(new MessageInfo(message, messageSize, messageBuffer, fullMessage));
+                                messageProcessing(new MessageData(message, messageSize, fullMessage));
                             }
 
                         }
