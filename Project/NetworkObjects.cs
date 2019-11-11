@@ -33,15 +33,15 @@ namespace BrainBlo
 
         public class MessageData
         {
-            public object message { get; private set; }
+            public object messageObject { get; private set; }
             public int messageSize { get; private set; }
-            public string fullMessage { get; private set; }
+            public string messageString { get; private set; }
 
-            public MessageData(object message, int messageSize, string fullMessage)
+            public MessageData(object messageObject, int messageSize, string messageString)
             {
-                this.message = message;
+                this.messageObject = messageObject;
                 this.messageSize = messageSize;
-                this.fullMessage = fullMessage;
+                this.messageString = messageString;
             }
         }
 

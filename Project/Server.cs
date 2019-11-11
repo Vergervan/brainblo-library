@@ -140,7 +140,7 @@ namespace BrainBlo
             private void ClientHandler<M>(Socket clientSocket)
             {
                 OnServerAccept?.Invoke(clientSocket);
-                int messageSize = 0;
+                int fullMessageSize = 0;
                 string fullMessage = string.Empty;
                 byte[] messageBuffer = new byte[1024];
                 try
@@ -149,8 +149,8 @@ namespace BrainBlo
                     {
                         do
                         {
-                            messageSize = clientSocket.Receive(messageBuffer);
-
+                            int messageSize = clientSocket.Receive(messageBuffer);
+                            fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (clientSocket.Available > 0);
 
@@ -169,7 +169,7 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(byteArray.bytes);
                                 }
-                                messageProcessing?.Invoke(new MessageData(message, messageSize, fullMessage));
+                                messageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
                             }
                         }
                         fullMessage = string.Empty;

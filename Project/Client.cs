@@ -233,12 +233,13 @@ namespace BrainBlo
                 {
                     while (true)
                     {
-                        int messageSize;
+                        int fullMessageSize = 0;
                         string fullMessage = string.Empty;
                         byte[] messageBuffer = new byte[1024];
                         do
                         {
-                            messageSize = socket.Receive(messageBuffer);
+                            int messageSize = socket.Receive(messageBuffer);
+                            fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (socket.Available > 0);
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
@@ -255,7 +256,7 @@ namespace BrainBlo
                                 {
                                     message = Encoding.UTF8.GetString(byteArray.bytes);
                                 }
-                                messageProcessing(new MessageData(message, messageSize, fullMessage));
+                                messageProcessing(new MessageData(message, fullMessageSize, fullMessage));
                             }
 
                         }
