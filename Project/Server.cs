@@ -101,21 +101,6 @@ namespace BrainBlo
                 }
             }
 
-            private void ListenClients()
-            {
-                OnServerStart?.Invoke();
-                switch (asyncWay)
-                {
-                    case AsyncWay.Task:
-                        Task.Run(() => AcceptClients<string>());
-                        break;
-                    case AsyncWay.Thread:
-                        Thread thread = new Thread(() => AcceptClients<string>());
-                        thread.Start();
-                        break;
-                }
-            }
-
             private void AcceptClients<M>()
             {
                 
