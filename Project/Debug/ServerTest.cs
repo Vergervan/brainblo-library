@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace BrainBlo
+{
+    namespace Network 
+    {
+        namespace Debug 
+        {
+            //Not working properly!
+            //It's better to refuse to use this!
+            //TODO Need to refine
+            public class ServerTest 
+            {
+                public IPEndPoint address;
+                private byte[] messageBuffer;
+                public event ConnectProcessing OnConnect;
+                public event SendProcessing OnSend;
+                public event ExceptionProcessing OnConnectException;
+                public event ExceptionProcessing OnSendException;
+
+                public ServerTest(EndPoint endPoint)
+                {
+                    address = (IPEndPoint)endPoint;
+                }
+
+                public void SetMessage(byte[] message)
+                {
+                    messageBuffer = message;
+                }
+
+                public void StartTest(int clientsCount, int millisecondsDelay)
+                {
+                    for(int i = 0; i < clientsCount; i++)
+                    {
+                        using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                        {
+                            Task.Run(() => NewClient(socket, millisecondsDelay));
+                            Thread.Sleep(10);
+                        }
+                    }
+                }
+
+                private async void NewClient(Socket socket, int millisecondsDelay)
+                {
+                    try
+                    {
+                        socket.Connect(address);
+                        OnConnect?.Invoke();
+                    }catch(Exception exception)
+                    {
+                        OnConnectException?.Invoke(exception);
+                    }
+                    while (true)
+                    {
+                        try
+                        {
+                            socket.Send(messageBuffer);
+                            OnSend?.Invoke();
+                        }catch(Exception exception)
+                        {
+                            OnSendException?.Invoke(exception);
+                        }
+                        await Task.Delay(millisecondsDelay);
+                    }
+                }
+            }
+        }
+    }
+}
