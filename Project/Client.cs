@@ -18,6 +18,7 @@ namespace BrainBlo
             private MessageProcessing messageProcessing { get; set; }
             public event ConnectProcessing OnConnect;
             public event SendProcessing OnSend;
+            public event ReceiveProcessing OnReceive;
             public event ExceptionProcessing OnConnectException;
             public event ExceptionProcessing OnSendException;
             public event ExceptionProcessing OnServerListenException;
@@ -229,8 +230,8 @@ namespace BrainBlo
 
             private void ListenServer<M>()
             {
-                int fullMessageSize = 0;
-                string fullMessage = string.Empty;
+                int fullMessageSize;
+                string fullMessage;
                 byte[] messageBuffer = new byte[1024];
                 try
                 {
@@ -244,23 +245,22 @@ namespace BrainBlo
                             fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (socket.Available > 0);
-                        List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
-                        lock (byteArrays)
-                        {
-                            foreach (var byteArray in byteArrays)
-                            {
-                                object message = default;
-                                if (typeof(M) != typeof(string))
-                                {
-                                    message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
-                                }
-                                else
-                                {
-                                    message = Encoding.UTF8.GetString(byteArray.bytes);
-                                }
-                                messageProcessing(new MessageData(message, fullMessageSize, fullMessage));
-                            }
+                        OnReceive?.Invoke();
 
+                        List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
+
+                        object message = default;
+                        foreach (var byteArray in byteArrays)
+                        {
+                            if (typeof(M) != typeof(string))
+                            {
+                                message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
+                            }
+                            else
+                            {
+                                message = Encoding.UTF8.GetString(byteArray.bytes);
+                            }
+                            messageProcessing(new MessageData(message, fullMessageSize, fullMessage));
                         }
                     }
                 }catch(Exception exception)

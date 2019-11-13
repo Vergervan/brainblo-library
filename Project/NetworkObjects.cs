@@ -14,6 +14,7 @@ namespace BrainBlo
         public delegate void AcceptProcessing(Socket socket);
         public delegate void ConnectProcessing();
         public delegate void SendProcessing();
+        public delegate void ReceiveProcessing();
         public delegate void ExceptionProcessing(Exception exception);
 
         public enum Protocol

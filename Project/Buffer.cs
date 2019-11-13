@@ -42,6 +42,11 @@ namespace BrainBlo
 
                     lastIndex = i;
                 }
+
+                if(i == buffer.Length-1 && buffer[i] != splitter)
+                {
+                    arrays.Add(new ByteArray(buffer));
+                }
             }
 
             return arrays;

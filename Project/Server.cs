@@ -19,6 +19,7 @@ namespace BrainBlo
             public event StartProcessing OnServerStart;
             public event AcceptProcessing OnServerAccept;
             public event SendProcessing OnSend;
+            public event ReceiveProcessing OnReceive;
             public event ExceptionProcessing OnSendException;
             public event ExceptionProcessing OnListenClientException;
             public ExceptionList exceptionList = new ExceptionList();
@@ -123,8 +124,8 @@ namespace BrainBlo
             private void ClientHandler<M>(Socket clientSocket)
             {
                 OnServerAccept?.Invoke(clientSocket);
-                int fullMessageSize = 0;
-                string fullMessage = string.Empty;
+                int fullMessageSize;
+                string fullMessage;
                 byte[] messageBuffer = new byte[1024];
                 try
                 {
@@ -138,24 +139,22 @@ namespace BrainBlo
                             fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (clientSocket.Available > 0);
+                        OnReceive?.Invoke();
 
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
 
                         object message = default;
-                        lock (byteArrays)
+                        foreach (var byteArray in byteArrays)
                         {
-                            foreach (var byteArray in byteArrays)
+                            if (typeof(M) != typeof(string))
                             {
-                                if (typeof(M) != typeof(string))
-                                {
-                                    message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
-                                }
-                                else
-                                {
-                                    message = Encoding.UTF8.GetString(byteArray.bytes);
-                                }
-                                messageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
+                                message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
                             }
+                            else
+                            {
+                                message = Encoding.UTF8.GetString(byteArray.bytes);
+                            }
+                            messageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
                         }
                     }
                 }
