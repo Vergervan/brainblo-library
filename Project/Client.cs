@@ -229,13 +229,15 @@ namespace BrainBlo
 
             private void ListenServer<M>()
             {
+                int fullMessageSize = 0;
+                string fullMessage = string.Empty;
+                byte[] messageBuffer = new byte[1024];
                 try
                 {
                     while (true)
                     {
-                        int fullMessageSize = 0;
-                        string fullMessage = string.Empty;
-                        byte[] messageBuffer = new byte[1024];
+                        fullMessageSize = 0;
+                        fullMessage = string.Empty;
                         do
                         {
                             int messageSize = socket.Receive(messageBuffer);
@@ -260,7 +262,6 @@ namespace BrainBlo
                             }
 
                         }
-                        fullMessage = string.Empty;
                     }
                 }catch(Exception exception)
                 {

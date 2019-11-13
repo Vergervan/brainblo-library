@@ -63,7 +63,6 @@ namespace BrainBlo
                 this.messageProcessing = messageProcessing;
                 socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
                 ListenClients<string>();
-                OnServerStart?.Invoke();
             }
 
             public void Start(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -71,7 +70,6 @@ namespace BrainBlo
                 this.messageProcessing = messageProcessing;
                 socket.Bind(new IPEndPoint(ipAddress, port));
                 ListenClients<string>();
-                OnServerStart?.Invoke();
             }
 
             public void Start<M>(string ipAddress, int port, MessageProcessing messageProcessing)
@@ -79,7 +77,6 @@ namespace BrainBlo
                 this.messageProcessing = messageProcessing;
                 socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
                 ListenClients<M>();
-                OnServerStart?.Invoke();
             }
 
             public void Start<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
@@ -87,11 +84,11 @@ namespace BrainBlo
                 this.messageProcessing = messageProcessing;
                 socket.Bind(new IPEndPoint(ipAddress, port));
                 ListenClients<M>();
-                OnServerStart?.Invoke();
             }
 
             private void ListenClients<M>()
             {
+                OnServerStart?.Invoke();
                 switch (asyncWay)
                 {
                     case AsyncWay.Task:
@@ -106,6 +103,7 @@ namespace BrainBlo
 
             private void ListenClients()
             {
+                OnServerStart?.Invoke();
                 switch (asyncWay)
                 {
                     case AsyncWay.Task:
@@ -147,6 +145,8 @@ namespace BrainBlo
                 {
                     while (true)
                     {
+                        fullMessage = string.Empty;
+                        fullMessageSize = 0;
                         do
                         {
                             int messageSize = clientSocket.Receive(messageBuffer);
@@ -172,7 +172,6 @@ namespace BrainBlo
                                 messageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
                             }
                         }
-                        fullMessage = string.Empty;
                     }
                 }
                 catch (Exception exception)
