@@ -32,17 +32,17 @@ namespace BrainBlo
             void NetworkEventDefinitions();
         }
 
-        public class MessageData
+        public struct MessageData
         {
-            public object messageObject { get; private set; }
-            public int messageSize { get; private set; }
-            public string messageString { get; private set; }
+            public object MessageObject { get; private set; }
+            public int MessageSize { get; private set; }
+            public string MessageString { get; private set; }
 
             public MessageData(object messageObject, int messageSize, string messageString)
             {
-                this.messageObject = messageObject;
-                this.messageSize = messageSize;
-                this.messageString = messageString;
+                MessageObject = messageObject;
+                MessageSize = messageSize;
+                MessageString = messageString;
             }
         }
 
@@ -67,11 +67,7 @@ namespace BrainBlo
         {
             ExceptionCell[] exceptionArray;
 
-            public ExceptionList()
-            {
-                exceptionArray = new ExceptionCell[1];
-                exceptionArray[0] = new ExceptionCell { exception = typeof(Exception), exceptionProcessing = null };
-            }
+            public ExceptionList() : this(null) {}
 
             public ExceptionList(ExceptionProcessing defaultExceptionProcessing)
             {

@@ -13,9 +13,9 @@ namespace BrainBlo
     {
         public class Server
         {
-            private Socket socket { get; set; }
-            public AsyncWay asyncWay { get; private set; }
-            private MessageProcessing messageProcessing { get; set; }
+            public Socket Socket { get; private set; }
+            public AsyncWay AsyncWay { get; private set; }
+            private MessageProcessing MessageProcessing { get; set; }
             public event StartProcessing OnServerStart;
             public event AcceptProcessing OnServerAccept;
             public event SendProcessing OnSend;
@@ -24,21 +24,12 @@ namespace BrainBlo
             public event ExceptionProcessing OnListenClientException;
             public ExceptionList exceptionList = new ExceptionList();
 
-            public Server(Protocol protocol)
-            {
-                if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                asyncWay = AsyncWay.Task;
-            }
+            public Server(Protocol protocol) : this(protocol, AsyncWay.Task) { }
 
             public Server(Protocol protocol, AsyncWay asyncWay)
             {
-                if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this.asyncWay = asyncWay;
-            }
-
-            public Socket GetSocket()
-            {
-                return socket;
+                if (protocol == Protocol.TCP) Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                this.AsyncWay = asyncWay;
             }
 
             public void Send(Socket client, byte[] messageBuffer, bool useExceptionList)
@@ -61,36 +52,30 @@ namespace BrainBlo
 
             public void Start(string ipAddress, int port, MessageProcessing messageProcessing)
             {
-                this.messageProcessing = messageProcessing;
-                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
-                ListenClients<string>();
+                Start<string>(IPAddress.Parse(ipAddress), port, messageProcessing);
             }
 
             public void Start(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
             {
-                this.messageProcessing = messageProcessing;
-                socket.Bind(new IPEndPoint(ipAddress, port));
-                ListenClients<string>();
+                Start<string>(ipAddress, port, messageProcessing);
             }
 
             public void Start<M>(string ipAddress, int port, MessageProcessing messageProcessing)
             {
-                this.messageProcessing = messageProcessing;
-                socket.Bind(new IPEndPoint(IPAddress.Parse(ipAddress), port));
-                ListenClients<M>();
+                Start<M>(IPAddress.Parse(ipAddress), port, messageProcessing);
             }
 
             public void Start<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
             {
-                this.messageProcessing = messageProcessing;
-                socket.Bind(new IPEndPoint(ipAddress, port));
+                this.MessageProcessing = messageProcessing;
+                Socket.Bind(new IPEndPoint(ipAddress, port));
                 ListenClients<M>();
             }
 
             private void ListenClients<M>()
             {
                 OnServerStart?.Invoke();
-                switch (asyncWay)
+                switch (AsyncWay)
                 {
                     case AsyncWay.Task:
                         Task.Run(() => AcceptClients<M>());
@@ -103,18 +88,17 @@ namespace BrainBlo
             }
 
             private void AcceptClients<M>()
-            {
-                
-                socket.Listen(0);
+            {        
+                Socket.Listen(0);
                 while (true)
                 {
-                    switch (asyncWay)
+                    switch (AsyncWay)
                     {
                         case AsyncWay.Task:
-                            Task.Run(() => ClientHandler<M>(socket.Accept()));
+                            Task.Run(() => ClientHandler<M>(Socket.Accept()));
                             break;
                         case AsyncWay.Thread:
-                            Thread thread = new Thread(() => ClientHandler<M>(socket.Accept()));
+                            Thread thread = new Thread(() => ClientHandler<M>(Socket.Accept()));
                             thread.Start();
                             break;
                     }
@@ -154,7 +138,7 @@ namespace BrainBlo
                             {
                                 message = Encoding.UTF8.GetString(byteArray.bytes);
                             }
-                            messageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
+                            MessageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
                         }
                     }
                 }

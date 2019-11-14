@@ -13,9 +13,9 @@ namespace BrainBlo
     {
         public class Client
         {
-            private Socket socket { get; set; }
-            public AsyncWay asyncWay { get; private set; }
-            private MessageProcessing messageProcessing { get; set; }
+            public Socket Socket { get; private set; }
+            public AsyncWay AsyncWay { get; private set; }
+            private MessageProcessing MessageProcessing { get; set; }
             public event ConnectProcessing OnConnect;
             public event SendProcessing OnSend;
             public event ReceiveProcessing OnReceive;
@@ -24,22 +24,13 @@ namespace BrainBlo
             public event ExceptionProcessing OnServerListenException;
             public ExceptionList exceptionList = new ExceptionList();
 
-            
-            public Client(Protocol protocol)
-            {
-                if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                asyncWay = AsyncWay.Task;
-            }
+
+            public Client(Protocol protocol) : this(protocol, AsyncWay.Task) { }
 
             public Client(Protocol protocol, AsyncWay asyncWay)
             {
-                if (protocol == Protocol.TCP) socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this.asyncWay = asyncWay;
-            }
-
-            public Socket GetSocket()
-            {
-                return socket;
+                if (protocol == Protocol.TCP) Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                AsyncWay = asyncWay;
             }
 
             public void Send(string message, bool useExceptionList)
@@ -49,7 +40,7 @@ namespace BrainBlo
                     byte[] messageBytes = Buffer.AddSplitter(Encoding.UTF8.GetBytes(message), 0);
                     try
                     {
-                        socket.Send(messageBytes);
+                        Socket.Send(messageBytes);
                         OnSend?.Invoke();
                     }
                     catch(Exception exception)
@@ -59,146 +50,33 @@ namespace BrainBlo
                     }
                 });
             }
-
-            public void Connect<M>(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
-            {
-                this.messageProcessing = messageProcessing;
-                switch (asyncWay)
-                {
-                    case AsyncWay.Task:
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(host, port);
-                                OnConnect?.Invoke();
-                                ListenServer<M>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        break;
-                    case AsyncWay.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(host, port);
-                                OnConnect?.Invoke();
-                                ListenServer<M>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        thread.Start();
-                        break;
-
-                }
-            }
-
-            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
-            {
-                this.messageProcessing = messageProcessing;
-                switch (asyncWay)
-                {
-                    case AsyncWay.Task:
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(ipAddress, port);
-                                OnConnect?.Invoke();
-                                ListenServer<M>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        break;
-                    case AsyncWay.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(ipAddress, port);
-                                OnConnect?.Invoke();
-                                ListenServer<M>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        thread.Start();
-                        break;
-
-                }
-            }
          
             public void Connect(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
-                this.messageProcessing = messageProcessing;
-                switch (asyncWay)
-                {
-                    case AsyncWay.Task:
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(host, port);
-                                OnConnect?.Invoke();
-                                ListenServer<string>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        break;
-                    case AsyncWay.Thread:
-                        Thread thread = new Thread(() =>
-                        {
-                            try
-                            {
-                                socket.Connect(host, port);
-                                OnConnect?.Invoke();
-                                ListenServer<string>();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (useExceptionList) CheckException(exception);
-                                else OnConnectException?.Invoke(exception);
-                            }
-                        });
-                        thread.Start();
-                        break;
-
-                }
+                Connect<string>(IPAddress.Parse(host), port, messageProcessing, useExceptionList);
             }
 
             public void Connect(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
             {
-                this.messageProcessing = messageProcessing;
-                switch (asyncWay)
+                Connect<string>(ipAddress, port, messageProcessing, useExceptionList);
+            }
+            public void Connect<M>(string host, int port, MessageProcessing messageProcessing, bool useExceptionList)
+            {
+                Connect<M>(IPAddress.Parse(host), port, messageProcessing, useExceptionList);
+            }
+            public void Connect<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing, bool useExceptionList)
+            {
+                this.MessageProcessing = messageProcessing;
+                switch (AsyncWay)
                 {
                     case AsyncWay.Task:
                         Task.Run(() =>
                         {
                             try
                             {
-                                socket.Connect(ipAddress, port);
+                                Socket.Connect(ipAddress, port);
                                 OnConnect?.Invoke();
-                                ListenServer<string>();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
@@ -212,9 +90,9 @@ namespace BrainBlo
                         {
                             try
                             {
-                                socket.Connect(ipAddress, port);
+                                Socket.Connect(ipAddress, port);
                                 OnConnect?.Invoke();
-                                ListenServer<string>();
+                                ListenServer<M>();
                             }
                             catch (Exception exception)
                             {
@@ -241,10 +119,10 @@ namespace BrainBlo
                         fullMessage = string.Empty;
                         do
                         {
-                            int messageSize = socket.Receive(messageBuffer);
+                            int messageSize = Socket.Receive(messageBuffer);
                             fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
-                        } while (socket.Available > 0);
+                        } while (Socket.Available > 0);
                         OnReceive?.Invoke();
 
                         List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
@@ -260,7 +138,7 @@ namespace BrainBlo
                             {
                                 message = Encoding.UTF8.GetString(byteArray.bytes);
                             }
-                            messageProcessing(new MessageData(message, fullMessageSize, fullMessage));
+                            MessageProcessing(new MessageData(message, fullMessageSize, fullMessage));
                         }
                     }
                 }catch(Exception exception)
