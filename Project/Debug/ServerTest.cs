@@ -20,10 +20,10 @@ namespace BrainBlo
             {
                 public IPEndPoint address;
                 private byte[] messageBuffer;
-                public event ConnectProcessing OnConnect;
-                public event SendProcessing OnSend;
-                public event ExceptionProcessing OnConnectException;
-                public event ExceptionProcessing OnSendException;
+                public event EventHandler OnConnect;
+                public event EventHandler OnSend;
+                public event EventHandler<ExceptionEventArgs> OnConnectException;
+                public event EventHandler<ExceptionEventArgs> OnSendException;
 
                 public ServerTest(EndPoint endPoint)
                 {
@@ -52,20 +52,20 @@ namespace BrainBlo
                     try
                     {
                         socket.Connect(address);
-                        OnConnect?.Invoke();
+                        OnConnect?.Invoke(this, new EventArgs());
                     }catch(Exception exception)
                     {
-                        OnConnectException?.Invoke(exception);
+                        OnConnectException?.Invoke(this, new ExceptionEventArgs(exception));
                     }
                     while (true)
                     {
                         try
                         {
                             socket.Send(messageBuffer);
-                            OnSend?.Invoke();
+                            OnSend?.Invoke(this, new EventArgs());
                         }catch(Exception exception)
                         {
-                            OnSendException?.Invoke(exception);
+                            OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
                         }
                         await Task.Delay(millisecondsDelay);
                     }

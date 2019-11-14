@@ -16,13 +16,13 @@ namespace BrainBlo
     public class BloMessage
     {
         [DataMember]
-        public MessageType messageType { get; private set; }
+        public MessageType MessageType { get; private set; }
         [DataMember]
-        public string message { get; private set; }
+        public string Message { get; private set; }
         public BloMessage(MessageType messageType, string message)
         {
-            this.messageType = messageType;
-            this.message = message;
+            MessageType = messageType;
+            Message = message;
         }
     }
 }

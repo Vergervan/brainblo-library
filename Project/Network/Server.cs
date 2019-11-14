@@ -15,23 +15,26 @@ namespace BrainBlo
         {
             public Socket Socket { get; private set; }
             public AsyncWay AsyncWay { get; private set; }
-            private MessageProcessing MessageProcessing { get; set; }
-            public event StartProcessing OnServerStart;
-            public event AcceptProcessing OnServerAccept;
-            public event SendProcessing OnSend;
-            public event ReceiveProcessing OnReceive;
-            public event ExceptionProcessing OnSendException;
-            public event ExceptionProcessing OnListenClientException;
+            public event EventHandler OnStart;
+            public event EventHandler<AcceptEventArgs> OnAccept;
+            public event EventHandler OnSend;
+            public event EventHandler OnReceive;
+            public event EventHandler<MessageProcessEventArgs> MessageProcessing;
+            public event EventHandler<ExceptionEventArgs> OnSendException;
+            public event EventHandler<ExceptionEventArgs> OnReceiveException;
             public ExceptionList exceptionList = new ExceptionList();
 
             public Server(Protocol protocol) : this(protocol, AsyncWay.Task) { }
-
             public Server(Protocol protocol, AsyncWay asyncWay)
             {
                 if (protocol == Protocol.TCP) Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this.AsyncWay = asyncWay;
+                AsyncWay = asyncWay;
             }
 
+            public void Send(Socket client, byte[] messageBuffer)
+            {
+                Send(client, messageBuffer, false);
+            }
             public void Send(Socket client, byte[] messageBuffer, bool useExceptionList)
             {
                 Task.Run(() =>
@@ -40,41 +43,37 @@ namespace BrainBlo
                     try
                     {
                         client.Send(messageBytes);
-                        OnSend?.Invoke();
+                        OnSend?.Invoke(this, new EventArgs());
                     }
                     catch (Exception exception)
                     {
                         if (useExceptionList) CheckException(exception);
-                        else OnSendException?.Invoke(exception);
+                        else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
                     }
                 });
             }
 
-            public void Start(string ipAddress, int port, MessageProcessing messageProcessing)
+            public void Start(string ipAddress, int port)
             {
-                Start<string>(IPAddress.Parse(ipAddress), port, messageProcessing);
+                Start<string>(IPAddress.Parse(ipAddress), port);
             }
-
-            public void Start(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Start(IPAddress ipAddress, int port)
             {
-                Start<string>(ipAddress, port, messageProcessing);
+                Start<string>(ipAddress, port);
             }
-
-            public void Start<M>(string ipAddress, int port, MessageProcessing messageProcessing)
+            public void Start<M>(string ipAddress, int port)
             {
-                Start<M>(IPAddress.Parse(ipAddress), port, messageProcessing);
+                Start<M>(IPAddress.Parse(ipAddress), port);
             }
-
-            public void Start<M>(IPAddress ipAddress, int port, MessageProcessing messageProcessing)
+            public void Start<M>(IPAddress ipAddress, int port)
             {
-                this.MessageProcessing = messageProcessing;
                 Socket.Bind(new IPEndPoint(ipAddress, port));
                 ListenClients<M>();
             }
 
             private void ListenClients<M>()
             {
-                OnServerStart?.Invoke();
+                OnStart?.Invoke(this, new EventArgs());
                 switch (AsyncWay)
                 {
                     case AsyncWay.Task:
@@ -107,45 +106,44 @@ namespace BrainBlo
 
             private void ClientHandler<M>(Socket clientSocket)
             {
-                OnServerAccept?.Invoke(clientSocket);
+                OnAccept?.Invoke(this, new AcceptEventArgs(clientSocket));
                 int fullMessageSize;
                 string fullMessage;
                 byte[] messageBuffer = new byte[1024];
-                try
+                while (true)
                 {
-                    while (true)
+                    fullMessage = string.Empty;
+                    fullMessageSize = 0;
+                    try
                     {
-                        fullMessage = string.Empty;
-                        fullMessageSize = 0;
                         do
                         {
                             int messageSize = clientSocket.Receive(messageBuffer);
                             fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (clientSocket.Available > 0);
-                        OnReceive?.Invoke();
-
-                        List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
-
-                        object message = default;
-                        foreach (var byteArray in byteArrays)
-                        {
-                            if (typeof(M) != typeof(string))
-                            {
-                                message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
-                            }
-                            else
-                            {
-                                message = Encoding.UTF8.GetString(byteArray.bytes);
-                            }
-                            MessageProcessing?.Invoke(new MessageData(message, fullMessageSize, fullMessage));
-                        }
+                        OnReceive?.Invoke(this, new EventArgs());
                     }
-                }
-                catch (Exception exception)
-                {
-                    if (OnListenClientException != null) OnListenClientException(exception);
-                    else CheckException(exception);
+                    catch (Exception exception)
+                    {
+                        OnReceiveException?.Invoke(this, new ExceptionEventArgs(exception));
+                    }
+
+                    List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
+
+                    object message = default;
+                    foreach (var byteArray in byteArrays)
+                    {
+                        if (typeof(M) != typeof(string))
+                        {
+                            message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
+                        }
+                        else
+                        {
+                            message = Encoding.UTF8.GetString(byteArray.bytes);
+                        }
+                        MessageProcessing?.Invoke(this, new MessageProcessEventArgs(new MessageData(message, fullMessageSize, fullMessage)));
+                    }
                 }
             }
 
