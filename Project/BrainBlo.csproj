@@ -48,7 +48,8 @@
     <Compile Include="Debug\ServerTest.cs" />
     <Compile Include="Network\EventArgsClasses.cs" />
     <Compile Include="Network\ExceptionClasses.cs" />
-    <Compile Include="Network\NetworkObjects.cs" />
+    <Compile Include="Network\NetworkObject.cs" />
+    <Compile Include="Network\NetworkElements.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Utils.cs" />

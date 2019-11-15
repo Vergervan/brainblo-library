@@ -11,10 +11,8 @@ namespace BrainBlo
 {
     namespace Network
     {
-        public class Client
+        public class Client : NetworkObject
         {
-            public Socket Socket { get; private set; }
-            public AsyncWay AsyncWay { get; private set; }
             public event EventHandler OnConnect;
             public event EventHandler OnSend;
             public event EventHandler OnReceive;
@@ -25,13 +23,9 @@ namespace BrainBlo
             public ExceptionList exceptionList = new ExceptionList();
 
 
-            public Client(Protocol protocol) : this(protocol, AsyncWay.Task) { }
+            public Client(Protocol protocol) : base(protocol) { }
 
-            public Client(Protocol protocol, AsyncWay asyncWay)
-            {
-                if (protocol == Protocol.TCP) Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                AsyncWay = asyncWay;
-            }
+            public Client(Protocol protocol, AsyncWay asyncWay) : base(protocol, asyncWay) { }
 
             public void Send(string message, bool useExceptionList)
             {
@@ -83,6 +77,7 @@ namespace BrainBlo
                 try
                 {
                     Socket.Connect(ipAddress, port);
+                    IsWorking = true;
                     OnConnect?.Invoke(this, new EventArgs());
                     ListenServer<M>();
                 }
