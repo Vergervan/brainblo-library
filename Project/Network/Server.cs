@@ -29,22 +29,32 @@ namespace BrainBlo
             {
                 Send(client, messageBuffer, false);
             }
+            public void Send(Socket client, string messageString)
+            {
+                Send(client, Encoding.UTF8.GetBytes(messageString), false);
+            }
+            public void Send(Socket client, string messageString, bool useExceptionList)
+            {
+                Send(client, Encoding.UTF8.GetBytes(messageString), useExceptionList);
+            }
             public void Send(Socket client, byte[] messageBuffer, bool useExceptionList)
             {
-                Task.Run(() =>
+                Task.Run(() => SendAsync(client, messageBuffer, useExceptionList));
+            }
+
+            private void SendAsync(Socket client, byte[] messageBuffer, bool useExceptionList)
+            {
+                byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
+                try
                 {
-                    byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
-                    try
-                    {
-                        client.Send(messageBytes);
-                        OnSend?.Invoke(this, new EventArgs());
-                    }
-                    catch (Exception exception)
-                    {
-                        if (useExceptionList) CheckException(exception);
-                        else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
-                    }
-                });
+                    client.Send(messageBytes);
+                    OnSend?.Invoke(this, new EventArgs());
+                }
+                catch (Exception exception)
+                {
+                    if (useExceptionList) CheckException(exception);
+                    else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
+                }
             }
 
             public void Start(string ipAddress, int port)

@@ -27,22 +27,36 @@ namespace BrainBlo
 
             public Client(Protocol protocol, AsyncWay asyncWay) : base(protocol, asyncWay) { }
 
+
+            public void Send(string message)
+            {
+                Send(Encoding.UTF8.GetBytes(message), false);
+            }
+            public void Send(byte[] messageBuffer)
+            {
+                Send(messageBuffer, false);
+            }
             public void Send(string message, bool useExceptionList)
             {
-                Task.Run(() =>
+                Send(Encoding.UTF8.GetBytes(message), useExceptionList);    
+            }
+            public void Send(byte[] messageBuffer, bool useExceptionList)
+            {
+                Task.Run(() => SendAsync(messageBuffer, useExceptionList));
+            }
+            private void SendAsync(byte[] messageBuffer, bool useExceptionList)
+            {
+                byte[] messageBytes = Buffer.AddSplitter(messageBuffer, 0);
+                try
                 {
-                    byte[] messageBytes = Buffer.AddSplitter(Encoding.UTF8.GetBytes(message), 0);
-                    try
-                    {
-                        Socket.Send(messageBytes);
-                        OnSend?.Invoke(this, new EventArgs());
-                    }
-                    catch(Exception exception)
-                    {
-                        if (useExceptionList) CheckException(exception);
-                        else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
-                    }
-                });
+                    Socket.Send(messageBytes);
+                    OnSend?.Invoke(this, new EventArgs());
+                }
+                catch (Exception exception)
+                {
+                    if (useExceptionList) CheckException(exception);
+                    else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
+                }
             }
          
             public void Connect(string host, int port, bool useExceptionList)
