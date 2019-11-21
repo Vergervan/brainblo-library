@@ -55,7 +55,7 @@ namespace BrainBlo
                 catch (Exception exception)
                 {
                     if (useExceptionList) CheckException(exception);
-                    else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
+                    else OnSendException?.Invoke(this, new ExceptionEventArgs(Socket, exception));
                 }
             }
          
@@ -98,7 +98,7 @@ namespace BrainBlo
                 catch (Exception exception)
                 {
                     if (useExceptionList) CheckException(exception);
-                    else OnConnectException?.Invoke(this, new ExceptionEventArgs(exception));
+                    else OnConnectException?.Invoke(this, new ExceptionEventArgs(Socket, exception));
                 }
             }
 
@@ -123,7 +123,7 @@ namespace BrainBlo
                     }
                     catch (Exception exception)
                     {
-                        OnReceiveException?.Invoke(this, new ExceptionEventArgs(exception));
+                        OnReceiveException?.Invoke(this, new ExceptionEventArgs(Socket, exception));
                     }
 
                     List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);

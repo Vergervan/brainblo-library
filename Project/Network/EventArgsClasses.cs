@@ -9,9 +9,11 @@ namespace BrainBlo.Network
 {
     public class ExceptionEventArgs : EventArgs
     {
+        public Socket Socket { get; private set; }
         public Exception Exception { get; private set; }
-        public ExceptionEventArgs(Exception exception)
+        public ExceptionEventArgs(Socket socket, Exception exception)
         {
+            Socket = socket;
             Exception = exception;
         }
     }
@@ -29,6 +31,15 @@ namespace BrainBlo.Network
         public MessageProcessEventArgs(MessageData messageData)
         {
             MessageData = messageData;
+        }
+    }
+
+    public class DisconnectEventArgs : EventArgs
+    {
+        public Socket Socket { get; private set; }
+        public DisconnectEventArgs(Socket socket)
+        {
+            Socket = socket;
         }
     }
 }

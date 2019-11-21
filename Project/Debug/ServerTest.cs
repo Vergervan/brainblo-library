@@ -55,7 +55,7 @@ namespace BrainBlo
                         OnConnect?.Invoke(this, new EventArgs());
                     }catch(Exception exception)
                     {
-                        OnConnectException?.Invoke(this, new ExceptionEventArgs(exception));
+                        OnConnectException?.Invoke(this, new ExceptionEventArgs(socket, exception));
                     }
                     while (true)
                     {
@@ -65,7 +65,7 @@ namespace BrainBlo
                             OnSend?.Invoke(this, new EventArgs());
                         }catch(Exception exception)
                         {
-                            OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
+                            OnSendException?.Invoke(this, new ExceptionEventArgs(socket, exception));
                         }
                         await Task.Delay(millisecondsDelay);
                     }

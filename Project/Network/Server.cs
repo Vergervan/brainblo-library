@@ -18,9 +18,11 @@ namespace BrainBlo
             public event EventHandler OnSend;
             public event EventHandler OnReceive;
             public event EventHandler<MessageProcessEventArgs> MessageProcessing;
+            public event EventHandler<DisconnectEventArgs> OnDisconnect;
             public event EventHandler<ExceptionEventArgs> OnSendException;
             public event EventHandler<ExceptionEventArgs> OnReceiveException;
             public ExceptionList exceptionList = new ExceptionList();
+            private List<Socket> clientList = new List<Socket>();
 
             public Server(Protocol protocol) : base(protocol) { }
             public Server(Protocol protocol, AsyncWay asyncWay) : base(protocol, asyncWay) { }
@@ -53,7 +55,7 @@ namespace BrainBlo
                 catch (Exception exception)
                 {
                     if (useExceptionList) CheckException(exception);
-                    else OnSendException?.Invoke(this, new ExceptionEventArgs(exception));
+                    else OnSendException?.Invoke(this, new ExceptionEventArgs(client, exception));
                 }
             }
 
@@ -96,21 +98,27 @@ namespace BrainBlo
                 Socket.Listen(0);
                 while (true)
                 {
-                    switch (AsyncWay)
-                    {
-                        case AsyncWay.Task:
-                            Task.Run(() => ClientHandler<M>(Socket.Accept()));
-                            break;
-                        case AsyncWay.Thread:
-                            Thread thread = new Thread(() => ClientHandler<M>(Socket.Accept()));
-                            thread.Start();
-                            break;
-                    }
+                    Socket socket = Socket.Accept();
+                    NewClient<M>(socket);
                 }
             }
-
+            private void NewClient<M>(Socket socket)
+            {
+                switch (AsyncWay)
+                {
+                    case AsyncWay.Task:
+                        Task task = new Task(() => ClientHandler<M>(socket));
+                        task.Start();
+                        break;
+                    case AsyncWay.Thread:
+                        Thread thread = new Thread(() => ClientHandler<M>(socket));
+                        thread.Start();
+                        break;
+                }
+            }
             private void ClientHandler<M>(Socket clientSocket)
             {
+                clientList.Add(clientSocket);
                 OnAccept?.Invoke(this, new AcceptEventArgs(clientSocket));
                 int fullMessageSize;
                 string fullMessage;
@@ -131,7 +139,8 @@ namespace BrainBlo
                     }
                     catch (Exception exception)
                     {
-                        OnReceiveException?.Invoke(this, new ExceptionEventArgs(exception));
+                        OnReceiveException?.Invoke(this, new ExceptionEventArgs(clientSocket, exception));
+                        break;
                     }
 
                     List<ByteArray> byteArrays = Buffer.SplitBuffer(Encoding.UTF8.GetBytes(fullMessage), 0);
@@ -151,7 +160,34 @@ namespace BrainBlo
                     }
                 }
             }
+            public Socket[] GetClientList()
+            {
+                return clientList.ToArray();
+            }
 
+            public void CheckIsConnected()
+            {
+                foreach (var socket in clientList.ToArray())
+                {
+                    if (!IsConnected(socket))
+                    {
+                        clientList.Remove(socket);
+                        OnDisconnect(this, new DisconnectEventArgs(socket));
+                    }
+                }
+            }
+
+            private bool IsConnected(Socket socket)
+            {
+                if(socket.Poll(1000, SelectMode.SelectRead) && (socket.Available == 0))
+                {
+                    return false;
+                }else if (!socket.Connected)
+                {
+                    return false;
+                }
+                return true;
+            }
             private void CheckException(Exception exception)
             {
                 exceptionList.InvokeExceptionProcess(exception);
