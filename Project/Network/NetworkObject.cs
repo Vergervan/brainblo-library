@@ -18,6 +18,7 @@ namespace BrainBlo.Network
         protected AsyncWay AsyncWay { get; set; }
         public bool IsWorking { get; set; }
         //public NetworkObjectType NetworkObjectType { get; private set; }
+        public NetworkObject() { }
         public NetworkObject(Protocol protocol) : this(protocol, AsyncWay.Task) { }
         public NetworkObject(Protocol protocol, AsyncWay asyncWay)
         {

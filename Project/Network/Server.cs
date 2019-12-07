@@ -13,19 +13,33 @@ namespace BrainBlo
     {
         public class Server : NetworkObject
         {
-            public event EventHandler OnStart;
-            public event EventHandler<AcceptEventArgs> OnAccept;
-            public event EventHandler OnSend;
-            public event EventHandler OnReceive;
+            public event EventHandler OnServerStart;
+            public event EventHandler<AcceptEventArgs> OnServerAccept;
+            public event EventHandler OnServerSend;
+            public event EventHandler OnServerReceive;
             public event EventHandler<MessageProcessEventArgs> MessageProcessing;
-            public event EventHandler<DisconnectEventArgs> OnDisconnect;
+            public event EventHandler<DisconnectEventArgs> OnServerDisconnect;
             public event EventHandler<ExceptionEventArgs> OnSendException;
             public event EventHandler<ExceptionEventArgs> OnReceiveException;
             public ExceptionList exceptionList = new ExceptionList();
             private List<Socket> clientList = new List<Socket>();
 
+            public Server() : base() { }
             public Server(Protocol protocol) : base(protocol) { }
-            public Server(Protocol protocol, AsyncWay asyncWay) : base(protocol, asyncWay) { }
+            public Server(Protocol protocol, AsyncWay asyncWay) : base(protocol, asyncWay) 
+            {
+                OnServerStart += OnStart;
+                OnServerAccept += OnAccept;
+                OnServerSend += OnSend;
+                OnServerReceive += OnReceive;
+                OnServerDisconnect += OnDisconnect;
+            }
+
+            protected virtual void OnStart(object sender, EventArgs e) { }
+            protected virtual void OnAccept(object sender, AcceptEventArgs e) { }
+            protected virtual void OnSend(object sender, EventArgs e) { }
+            protected virtual void OnReceive(object sender, EventArgs e) { }
+            protected virtual void OnDisconnect(object sender, DisconnectEventArgs e) { }
 
             public void Send(Socket client, byte[] messageBuffer)
             {
@@ -50,7 +64,7 @@ namespace BrainBlo
                 try
                 {
                     client.Send(messageBytes);
-                    OnSend?.Invoke(this, new EventArgs());
+                    OnServerSend?.Invoke(this, new EventArgs());
                 }
                 catch (Exception exception)
                 {
@@ -80,7 +94,7 @@ namespace BrainBlo
             private void ListenClients<M>()
             {
                 IsWorking = true;
-                OnStart?.Invoke(this, new EventArgs());
+                OnServerStart?.Invoke(this, new EventArgs());
                 switch (AsyncWay)
                 {
                     case AsyncWay.Task:
@@ -119,7 +133,7 @@ namespace BrainBlo
             private void ClientHandler<M>(Socket clientSocket)
             {
                 clientList.Add(clientSocket);
-                OnAccept?.Invoke(this, new AcceptEventArgs(clientSocket));
+                OnServerAccept?.Invoke(this, new AcceptEventArgs(clientSocket));
                 int fullMessageSize;
                 string fullMessage;
                 byte[] messageBuffer = new byte[1024];
@@ -135,7 +149,7 @@ namespace BrainBlo
                             fullMessageSize += messageSize;
                             fullMessage += Encoding.UTF8.GetString(messageBuffer, 0, messageSize);
                         } while (clientSocket.Available > 0);
-                        OnReceive?.Invoke(this, new EventArgs());
+                        OnServerReceive?.Invoke(this, new EventArgs());
                     }
                     catch (Exception exception)
                     {
@@ -172,7 +186,7 @@ namespace BrainBlo
                     if (!IsConnected(socket))
                     {
                         clientList.Remove(socket);
-                        OnDisconnect(this, new DisconnectEventArgs(socket));
+                        OnServerDisconnect(this, new DisconnectEventArgs(socket));
                     }
                 }
             }
