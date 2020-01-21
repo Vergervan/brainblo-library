@@ -16,7 +16,7 @@ namespace BrainBlo
             //Not working properly!
             //It's better to refuse to use this!
             //TODO Need to refine
-            public class ServerTest 
+            public class ServerTest
             {
                 public IPEndPoint address;
                 private byte[] messageBuffer;
@@ -37,16 +37,13 @@ namespace BrainBlo
 
                 public void StartTest(int clientsCount, int millisecondsDelay)
                 {
-                    for(int i = 0; i < clientsCount; i++)
+                    for (int i = 0; i < clientsCount; i++)
                     {
-                        using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-                        {
-                            Task.Run(() => NewClient(socket, millisecondsDelay));
-                            Thread.Sleep(10);
-                        }
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        Task.Run(() => NewClient(socket, millisecondsDelay));
+                        Thread.Sleep(10);
                     }
                 }
-
                 private async void NewClient(Socket socket, int millisecondsDelay)
                 {
                     try

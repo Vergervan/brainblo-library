@@ -9,9 +9,9 @@ using System.IO;
 
 namespace BrainBlo
 {
-    public static class Utils
+    public static class JsonSerializer
     {
-        public static string SerializeJson(object o)
+        public static string Serialize(object o)
         {
             DataContractJsonSerializer jsonSerializer = new DataContractJsonSerializer(o.GetType());
             MemoryStream ms = new MemoryStream();
@@ -25,16 +25,13 @@ namespace BrainBlo
             return json;
         }
 
-        public static T DeserializeJson<T>(string jsonString)
+        public static T Deserialize<T>(string jsonString)
         {
-            MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString));
-            DataContractJsonSerializer jsonDerializer = new DataContractJsonSerializer(typeof(T));
-            return (T)jsonDerializer.ReadObject(ms);
-        }
-
-        public static Type GetType<T>()
-        {
-            return typeof(T);
+            using (MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                DataContractJsonSerializer jsonDerializer = new DataContractJsonSerializer(typeof(T));
+                return (T)jsonDerializer.ReadObject(ms);
+            }
         }
     }
 }

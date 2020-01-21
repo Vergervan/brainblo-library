@@ -43,7 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BloMessage.cs" />
+    <Compile Include="Data\Serialization\AttributesClasses.cs" />
+    <Compile Include="Data\Serialization\BrainBloSerializer.cs" />
     <Compile Include="Data\Buffer.cs" />
+    <Compile Include="Math.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Debug\ServerTest.cs" />
     <Compile Include="Network\EventArgsClasses.cs" />
@@ -52,7 +55,7 @@
     <Compile Include="Network\NetworkElements.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Data\Utils.cs" />
+    <Compile Include="Data\JsonSerializer.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

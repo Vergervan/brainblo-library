@@ -164,7 +164,7 @@ namespace BrainBlo
                     {
                         if (typeof(M) != typeof(string))
                         {
-                            message = Utils.DeserializeJson<M>(Encoding.UTF8.GetString(byteArray.bytes));
+                            message = JsonSerializer.Deserialize<M>(Encoding.UTF8.GetString(byteArray.bytes));
                         }
                         else
                         {
