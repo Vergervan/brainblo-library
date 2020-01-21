@@ -35,11 +35,11 @@ namespace BrainBlo
                 OnServerDisconnect += OnDisconnect;
             }
 
-            protected virtual void OnStart(object sender, EventArgs e) { }
-            protected virtual void OnAccept(object sender, AcceptEventArgs e) { }
-            protected virtual void OnSend(object sender, EventArgs e) { }
-            protected virtual void OnReceive(object sender, EventArgs e) { }
-            protected virtual void OnDisconnect(object sender, DisconnectEventArgs e) { }
+            private protected virtual void OnStart(object sender, EventArgs e) { }
+            private protected virtual void OnAccept(object sender, AcceptEventArgs e) { }
+            private protected virtual void OnSend(object sender, EventArgs e) { }
+            private protected virtual void OnReceive(object sender, EventArgs e) { }
+            private protected virtual void OnDisconnect(object sender, DisconnectEventArgs e) { }
 
             public void Send(Socket client, byte[] messageBuffer)
             {
@@ -114,6 +114,7 @@ namespace BrainBlo
                 {
                     Socket socket = Socket.Accept();
                     NewClient<M>(socket);
+                    
                 }
             }
             private void NewClient<M>(Socket socket)
