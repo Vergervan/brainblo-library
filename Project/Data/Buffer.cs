@@ -80,5 +80,20 @@ namespace BrainBlo
             }
             return newbuffer;
         }
+
+        public static void CombineBuffers(ref byte[] sourceBuffer, byte[] addedBuffer)
+        {
+            int newbufferSize = sourceBuffer.Length + addedBuffer.Length;
+            byte[] newbuffer = new byte[newbufferSize];
+            for (int i = 0; i < sourceBuffer.Length; i++)
+            {
+                newbuffer[i] = sourceBuffer[i];
+            }
+            for (int i = sourceBuffer.Length; i < newbufferSize; i++)
+            {
+                newbuffer[i] = addedBuffer[i - sourceBuffer.Length];
+            }
+            sourceBuffer = newbuffer;
+        }
     }
 }
