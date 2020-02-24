@@ -52,6 +52,16 @@ namespace BrainBlo
             return arrays;
         }
 
+        public static byte[] ChangeBufferSize(byte[] sourceBuffer, int startIndex, int length)
+        {
+            byte[] newbuffer = new byte[length - startIndex];
+            for(int i = startIndex, j = 0; j < length-startIndex; i++, j++)
+            {
+                newbuffer[j] = sourceBuffer[i];
+            }
+            return newbuffer;
+        }
+
         public static byte[] AddSplitter(byte[] buffer, byte splitter)
         {
             byte[] newbuffer = new byte[buffer.Length + 1];
