@@ -52,6 +52,15 @@ namespace BrainBlo
             return arrays;
         }
 
+        public static bool HasSplitter(byte[] sourceBuffer, byte splitter)
+        {
+            for(int i = 0; i < sourceBuffer.Length; i++)
+            {
+                if (sourceBuffer[i] == splitter) return true;
+            }
+            return false;
+        }
+
         public static byte[] ChangeBufferSize(byte[] sourceBuffer, int startIndex, int length)
         {
             byte[] newbuffer = new byte[length - startIndex];
