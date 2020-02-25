@@ -41,9 +41,16 @@ namespace BrainBlo
                     arrays.Add(new ByteArray(newbuffer));
 
                     lastIndex = i;
-                }
+                }else if(i == buffer.Length-1 && lastIndex != 0)
+                {
+                    byte[] newbuffer = new byte[buffer.Length - 1 - lastIndex];
+                    for(int j = lastIndex+1, k = 0; j < buffer.Length; j++, k++)
+                    {
+                        newbuffer[k] = buffer[j];
+                    }
+                    arrays.Add(new ByteArray(newbuffer));
 
-                if(i == buffer.Length-1 && buffer[i] != splitter)
+                }else if(i == buffer.Length-1 && lastIndex == 0)
                 {
                     arrays.Add(new ByteArray(buffer));
                 }
