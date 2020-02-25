@@ -27,7 +27,17 @@ namespace BrainBlo
 
             for (int i = 0; i < buffer.Length; i++)
             {
-                if (buffer[i] == splitter)
+                if (i == buffer.Length - 1 && lastIndex != 0)
+                {
+                    byte[] newbuffer = new byte[buffer.Length - 1 - lastIndex];
+                    for (int j = lastIndex + 1, k = 0; j < buffer.Length; j++, k++)
+                    {
+                        newbuffer[k] = buffer[j];
+                    }
+                    arrays.Add(new ByteArray(newbuffer));
+
+                }
+                else if (buffer[i] == splitter)
                 {
                     inc = lastIndex == 0 ? 0 : 1;
                     x = i - inc - lastIndex;
@@ -41,15 +51,6 @@ namespace BrainBlo
                     arrays.Add(new ByteArray(newbuffer));
 
                     lastIndex = i;
-                }else if(i == buffer.Length-1 && lastIndex != 0)
-                {
-                    byte[] newbuffer = new byte[buffer.Length - 1 - lastIndex];
-                    for(int j = lastIndex+1, k = 0; j < buffer.Length; j++, k++)
-                    {
-                        newbuffer[k] = buffer[j];
-                    }
-                    arrays.Add(new ByteArray(newbuffer));
-
                 }else if(i == buffer.Length-1 && lastIndex == 0)
                 {
                     arrays.Add(new ByteArray(buffer));
@@ -89,6 +90,16 @@ namespace BrainBlo
 
             newbuffer[newbuffer.Length - 1] = splitter;
 
+            return newbuffer;
+        }
+
+        public static byte[] RemoveEndSplitter(byte[] buffer)
+        {
+            byte[] newbuffer = new byte[buffer.Length - 1];
+            for(int i = 0; i < newbuffer.Length; i++)
+            {
+                newbuffer[i] = buffer[i];
+            }
             return newbuffer;
         }
 
