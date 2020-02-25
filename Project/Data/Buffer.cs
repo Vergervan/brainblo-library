@@ -37,6 +37,10 @@ namespace BrainBlo
                     arrays.Add(new ByteArray(newbuffer));
 
                 }
+                else if (i == buffer.Length - 1 && lastIndex == 0)
+                {
+                    arrays.Add(new ByteArray(buffer));
+                }
                 else if (buffer[i] == splitter)
                 {
                     inc = lastIndex == 0 ? 0 : 1;
@@ -51,9 +55,6 @@ namespace BrainBlo
                     arrays.Add(new ByteArray(newbuffer));
 
                     lastIndex = i;
-                }else if(i == buffer.Length-1 && lastIndex == 0)
-                {
-                    arrays.Add(new ByteArray(buffer));
                 }
             }
 
@@ -95,6 +96,7 @@ namespace BrainBlo
 
         public static byte[] RemoveEndSplitter(byte[] buffer)
         {
+
             byte[] newbuffer = new byte[buffer.Length - 1];
             for(int i = 0; i < newbuffer.Length; i++)
             {
