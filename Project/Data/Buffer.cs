@@ -72,8 +72,8 @@ namespace BrainBlo
 
         public static byte[] ChangeBufferSize(byte[] sourceBuffer, int startIndex, int length)
         {
-            byte[] newbuffer = new byte[length - startIndex];
-            for(int i = startIndex, j = 0; j < length-startIndex; i++, j++)
+            byte[] newbuffer = new byte[length];
+            for(int i = startIndex, j = 0; j < length; i++, j++)
             {
                 newbuffer[j] = sourceBuffer[i];
             }
