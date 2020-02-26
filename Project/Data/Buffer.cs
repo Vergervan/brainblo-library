@@ -39,7 +39,7 @@ namespace BrainBlo
                 }
                 else if (i == buffer.Length - 1 && lastIndex == 0)
                 {
-                    arrays.Add(new ByteArray(AddSplitter(buffer,0)));
+                    arrays.Add(new ByteArray(buffer));
                 }
                 else if (buffer[i] == splitter)
                 {
