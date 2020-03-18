@@ -121,7 +121,6 @@ namespace BrainBlo
         public static byte[] CombineBuffers(byte[] sourceBuffer, int sourceBufferStartPos, byte[] addedBuffer, int addedBufferStartPos, int addedBufferSize)
         {
             int newbufferSize = sourceBuffer.Length + addedBufferSize - sourceBufferStartPos - addedBufferStartPos;
-            Console.WriteLine("NBS: " + newbufferSize);
             byte[] newbuffer = new byte[newbufferSize];
             for (int i = 0, j = sourceBufferStartPos; j < sourceBuffer.Length; i++, j++)
             {
