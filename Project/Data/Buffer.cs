@@ -70,6 +70,17 @@ namespace BrainBlo
             return false;
         }
 
+        public static byte[] AddStartCode(byte[] sourceBuffer, byte code)
+        {
+            byte[] newbuffer = new byte[sourceBuffer.Length + 1];
+            newbuffer[0] = code;
+            for(int i = 0, j = 1; i < sourceBuffer.Length; i++, j++)
+            {
+                newbuffer[j] = sourceBuffer[i];
+            }
+            return newbuffer;
+        }
+
         public static byte[] ChangeBufferSize(byte[] sourceBuffer, int startIndex, int length)
         {
             byte[] newbuffer = new byte[length];
@@ -105,19 +116,20 @@ namespace BrainBlo
             return newbuffer;
         }
 
-        public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer) { return CombineBuffers(sourceBuffer, addedBuffer, addedBuffer.Length); }
-
-        public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer, int addedBufferSize)
+        public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer) { return CombineBuffers(sourceBuffer, 0, addedBuffer, 0, addedBuffer.Length); }
+        public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer, int addedBufferSize) { return CombineBuffers(sourceBuffer, 0, addedBuffer, 0, addedBufferSize); }
+        public static byte[] CombineBuffers(byte[] sourceBuffer, int sourceBufferStartPos, byte[] addedBuffer, int addedBufferStartPos, int addedBufferSize)
         {
-            int newbufferSize = sourceBuffer.Length + addedBufferSize;
+            int newbufferSize = sourceBuffer.Length + addedBufferSize - sourceBufferStartPos - addedBufferStartPos;
+            Console.WriteLine("NBS: " + newbufferSize);
             byte[] newbuffer = new byte[newbufferSize];
-            for(int i = 0; i < sourceBuffer.Length; i++)
+            for (int i = 0, j = sourceBufferStartPos; j < sourceBuffer.Length; i++, j++)
             {
-                newbuffer[i] = sourceBuffer[i];
+                newbuffer[i] = sourceBuffer[j];
             }
-            for(int i = sourceBuffer.Length; i < newbufferSize; i++)
+            for (int i = sourceBuffer.Length == 0 ? sourceBuffer.Length : sourceBuffer.Length - sourceBufferStartPos - addedBufferStartPos, j = sourceBuffer.Length + addedBufferStartPos; j <= newbufferSize; i++, j++)
             {
-                newbuffer[i] = addedBuffer[i - sourceBuffer.Length];
+                newbuffer[i] = addedBuffer[j - sourceBuffer.Length];
             }
             return newbuffer;
         }

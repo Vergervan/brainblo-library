@@ -12,12 +12,10 @@ namespace BrainBlo
         Connect = 0,
         Debug = 1
     }
-    [DataContract]
+    [Serializable]
     public class BloMessage
     {
-        [DataMember]
         public MessageType MessageType { get; private set; }
-        [DataMember]
         public string Message { get; private set; }
         public BloMessage(MessageType messageType, string message)
         {
