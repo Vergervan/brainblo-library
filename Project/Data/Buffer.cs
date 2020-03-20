@@ -116,7 +116,6 @@ namespace BrainBlo
             return newbuffer;
         }
 
-        //Need to redo
         public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer) { return CombineBuffers(sourceBuffer, 0, addedBuffer, 0, addedBuffer.Length); }
         public static byte[] CombineBuffers(byte[] sourceBuffer, byte[] addedBuffer, int addedBufferSize) { return CombineBuffers(sourceBuffer, 0, addedBuffer, 0, addedBufferSize); }
         public static byte[] CombineBuffers(byte[] sourceBuffer, int sourceBufferStartPos, byte[] addedBuffer, int addedBufferStartPos, int addedBufferSize)
@@ -127,9 +126,9 @@ namespace BrainBlo
             {
                 newbuffer[i] = sourceBuffer[j];
             }
-            for (int i = sourceBuffer.Length == 0 ? sourceBuffer.Length : sourceBuffer.Length - sourceBufferStartPos, j = sourceBuffer.Length + addedBufferStartPos; j <= newbufferSize; i++, j++)
+            for (int i = sourceBuffer.Length == 0 ? sourceBuffer.Length : sourceBuffer.Length - sourceBufferStartPos, j = addedBufferStartPos; j < addedBufferSize; i++, j++)
             {
-                newbuffer[i] = addedBuffer[j - sourceBuffer.Length];
+                newbuffer[i] = addedBuffer[j];
             }
             return newbuffer;
         }
