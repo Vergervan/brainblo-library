@@ -12,7 +12,7 @@ namespace BrainBlo.Network
     public class UdpMember
     {
         private Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        private IPEndPoint ipend;
+        public IPEndPoint EndPoint { get; private set; }
         private int maxBufferSize = 1024;
         public int Available { get { return socket.Available; } private set { } }
         private BrainBlo.Debug.Log log;
@@ -34,15 +34,15 @@ namespace BrainBlo.Network
 
         public UdpMember(int port)
         {
-            ipend = new IPEndPoint(IPAddress.Any, port);
-            socket.Bind(ipend);
+            EndPoint = new IPEndPoint(IPAddress.Any, port);
+            socket.Bind(EndPoint);
             log = BrainBlo.Debug.Log.Initialize();
         }
         
         public UdpMember(string host, int port)
         {
-            ipend = new IPEndPoint(IPAddress.Parse(host), port);
-            socket.Connect(ipend);
+            EndPoint = new IPEndPoint(IPAddress.Parse(host), port);
+            socket.Connect(EndPoint);
             isWorking = true;
             log = BrainBlo.Debug.Log.Initialize();
 
@@ -61,6 +61,8 @@ namespace BrainBlo.Network
         {
             maxBufferSize = count;
         }
+
+        
 
         public void Start()
         {
@@ -174,6 +176,15 @@ namespace BrainBlo.Network
             waitHandler.Reset();
         }
 
+        public byte[] Receive()
+        {
+            waitHandler.WaitOne();
+            log.WriteLine("Receive method was called");
+            OnReceiveMessage orm = onReceiveMessages.Dequeue();
+            waitHandler.Reset();
+            return orm.Message;
+        }
+
         public byte[] Receive(ref IPEndPoint sender)
         {
             waitHandler.WaitOne();
@@ -183,6 +194,8 @@ namespace BrainBlo.Network
             waitHandler.Reset();
             return orm.Message;
         }
+
+        public void Send(byte[] message) { Send(EndPoint, message); }
 
         public void Send(IPEndPoint point, byte[] message)
         {
