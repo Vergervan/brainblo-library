@@ -10,9 +10,8 @@ namespace BrainBlo.Debug
     public class Log
     {
         static Log log;
-        static FileStream fs = new FileStream("log.txt", FileMode.Create);
-        StreamWriter sw = new StreamWriter(fs);
-        StreamReader sr = new StreamReader(fs);
+        public delegate void LogMessage(string str);
+        public event LogMessage OnGetLog;
         private Log() { }
         public static Log Initialize()
         {
@@ -20,28 +19,17 @@ namespace BrainBlo.Debug
             {
                 log = new Log();
             }
-            log.WriteLine("Log was initialized");
+            log.Write("Log was initialized");
             return log;
         }
         public void Write(string text)
         {
-            sw.Write(text);
-            sw.Flush();
-        }
-        public void WriteLine(string text)
-        {
-            sw.WriteLine(text);
-            sw.Flush();
+            OnGetLog?.Invoke(text);
         }
 
         ~Log()
         {
-            log.sw.Close();
-            log.sw.Dispose();
-            log.sr.Close();
-            log.sr.Dispose();
-            fs.Close();
-            fs.Dispose();
+            log.Write("Log was destroyed");
         }
     }
 }
