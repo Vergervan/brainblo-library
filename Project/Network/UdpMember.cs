@@ -12,6 +12,8 @@ namespace BrainBlo.Network
     public class UdpMember
     {
         private Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        public Socket Socket { get { return socket; } private set { } }
+        public event EventHandler OnDispose; 
         public IPEndPoint EndPoint { get; private set; }
         private int maxBufferSize = 1024;
         public int Available { get { return socket.Available; } private set { } }
@@ -31,13 +33,14 @@ namespace BrainBlo.Network
         public int PendingMessagesCount { get { return pendingMessages.Count; } private set { } }
         public int ReceiveMessagesCount { get { return onReceiveMessages.Count; } private set { } }
 
+        public UdpMember() { }
+
         public UdpMember(int port)
         {
             log = BrainBlo.Debug.Log.Initialize();
             EndPoint = new IPEndPoint(IPAddress.Any, port);
             socket.Bind(EndPoint);
             isWorking = true;
-            
         }
         
         public UdpMember(string host, int port)
@@ -59,7 +62,7 @@ namespace BrainBlo.Network
 
         ~UdpMember()
         {
-
+            OnDispose?.Invoke(this, new EventArgs());
             socket.Close();
             socket.Dispose();
         }
@@ -85,6 +88,7 @@ namespace BrainBlo.Network
 
         public void Disconnect()
         {
+            socket.SendTo(new byte[] { 3 }, EndPoint);
             isWorking = false;
             socket.Disconnect(false);
         }
