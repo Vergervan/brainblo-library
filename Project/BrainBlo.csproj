@@ -42,7 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Projects\BloMessage.cs" />
+    <Compile Include="Projects\Protos\BBMessage.proto" />
+    <Compile Include="Projects\Scripts\BloMessage.cs" />
+    <Compile Include="NewNetwork\ClientNetHandle.cs" />
+    <Compile Include="NewNetwork\NetHandle.cs" />
+    <Compile Include="NewNetwork\ServerNetHandle.cs" />
     <Compile Include="Data\Serialization\AttributesClasses.cs" />
     <Compile Include="Data\Serialization\BrainBloSerializer.cs" />
     <Compile Include="Data\Buffer.cs" />
