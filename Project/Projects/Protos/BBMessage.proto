@@ -1,26 +1,24 @@
 //First version of BrainBloMessage builded by protobuff
 syntax = "proto3";
 
-message Vector3 {
-      float x = 1;
-      float y= 2;
-      float z = 3;
-}
-
-message PlayerInfo{
-      string name = 1;
-      Vector3 position = 2;
-      Vector3 rotation = 3;
-}
-
 message BBMessage{
-   enum MessageType {
+      message Vector3 {
+            float x = 1;
+            float y= 2;
+            float z = 3;
+      }
+      message PlayerInfo{
+            string name = 1;
+            Vector3 position = 2;
+            Vector3 rotation = 3;
+      }
+      enum MessageType {
          Connect = 0;
          Text = 1;
-         PlayerInfo = 2;
-   }
-   MessageType messageType = 1;
-   PlayerInfo playerInfo = 2;
-   repeated PlayerInfo playerInfos = 3;
-   string messageText = 4;
+         PlayerData = 2;
+      }
+      MessageType messageType = 1;
+      PlayerInfo playerInfo = 2;
+      repeated PlayerInfo playerInfos = 3;
+      string messageText = 4;
 }
