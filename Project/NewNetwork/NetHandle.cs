@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -8,16 +7,18 @@ using System.Threading.Tasks;
 
 namespace BrainBlo.NewNetwork
 {
+    public delegate void MessageCallbackHandler(Message message);
     public abstract class NetHandle
     {
         private Socket _socket; //Socket object of this handle
         private IPEndPoint _curEndPoint; //Current end point which was used in bind or connect
         private bool _isRunning;
-        public Socket SocketObject { get { return _socket; } }
+        private ILog log;
+        private int _bufferSize = 1024;
+        public int BufferSize { get; set; }
+        protected Socket SocketObject { get { return _socket; } set { _socket = value; }}
         public IPEndPoint CurrentEndPoint { get { return _curEndPoint; } }
         public bool IsRunning { get { return _isRunning; } }
-
-        public delegate void MessageCallbackHandler(Message message);
 
         /// <param name="ipAddress">IP address for setting the server point</param>
         public NetHandle(IPAddress ipAddress, int port)
@@ -34,29 +35,99 @@ namespace BrainBlo.NewNetwork
         }
         public void Use(MessageCallbackHandler messageCallback)
         {
-            if (_isRunning) throw new Exception("Server already is running");
+            if (_isRunning)
+            {
+                Stop(true);
+                throw new Exception("Server already is running");
+            }
+            Configure(); //Configures the socket. Must be overridden by derivative class
             _isRunning = true;
             Task.Run(() => Run(messageCallback));
         }
-        protected virtual void Run(MessageCallbackHandler messageCallback) { }
-        public virtual void Send(Message message)
+        private void Run(MessageCallbackHandler messageCallback)
+        {
+            EndPoint endPoint = new IPEndPoint(IPAddress.None, CurrentEndPoint.Port);
+            byte[] messageBuffer = new byte[_bufferSize];
+            int messageSize = 0;
+            while (IsRunning)
+            {
+                try
+                {
+                    messageSize = SocketObject.ReceiveFrom(messageBuffer, ref endPoint);
+                } catch (Exception e)
+                {
+                    Stop(true);
+                    throw e;
+                }
+                messageCallback?.Invoke(new Message(messageBuffer, messageSize, (IPEndPoint) endPoint));
+            }
+            Stop(true);
+        }
+        public virtual void Send(Message message) //If you need to override the Send method, then you should use base.Send at the end of the new overridden method
         {
             _socket.SendTo(message.messageBuffer, message.point);
         }
-        public void Stop()
+
+        protected virtual void Configure() { }
+
+        public void Unuse()
         {
-            _isRunning = false;
+            Stop(true);
         }
         ~NetHandle()
         {
+            Stop(false);
+        }
+        private void Stop(bool reuse)
+        {
+            _isRunning = false;
             _socket.Close();
             _socket.Dispose();
+            if (reuse) _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            SendLog(0);
+        }
+        private void SendLog(int code)
+        {
+            log?.LogCallback(new LogData(code));
+        }
+        public void SetLog(ILog log)
+        {
+            this.log = log;
+        }
+        public void ClearLog()
+        {
+            log = null;
         }
     }
-    public class Message
+    public class LogData
     {
-        public int messageSize;
-        public byte[] messageBuffer;
-        public IPEndPoint point;
+        private int _code;
+        public int Code { get { return _code; } }
+        public object addData;
+        public string Message { get { return Transcript(_code); } }
+        public LogData(int code, object addData)
+        {
+            _code = code;
+            this.addData = addData;
+        }
+        public LogData(int code) : this(code, null) { }
+        
+
+        //Test variant
+        //Need to improve
+        private string Transcript(int code)
+        {
+            switch (code)
+            {
+                case 0:
+                    return "Debug";
+                default:
+                    return "Nothing";
+            }
+        }
+    }
+    public interface ILog
+    {
+        void LogCallback(LogData logData);
     }
 }

@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Projects\Protos\BBMessage.proto" />
+    <Compile Include="NewNetwork\Message.cs" />
     <Compile Include="Projects\Scripts\BloMessage.cs" />
     <Compile Include="NewNetwork\ClientNetHandle.cs" />
     <Compile Include="NewNetwork\NetHandle.cs" />
