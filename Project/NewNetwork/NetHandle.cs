@@ -55,14 +55,22 @@ namespace BrainBlo.NewNetwork
                 {
                     messageSize = SocketObject.ReceiveFrom(messageBuffer, ref endPoint);
                 }
-                catch (Exception) { } //Need to make a log code for this exception
+                catch (Exception) { continue; } //Need to make a log code for this exception
                 messageCallback?.Invoke(this, new Message(messageBuffer, messageSize, (IPEndPoint) endPoint));
             }
             Stop(true);
         }
         public virtual void Send(Message message) //If you need to override the Send method, then you should use base.Send at the end of the new overridden method
         {
-            _socket.SendTo(message.messageBuffer, message.point);
+            _socket.SendTo(Resize(message), message.point);
+        }
+
+        private byte[] Resize(Message message)
+        {
+            if (message.messageBuffer.Length == message.messageSize) return message.messageBuffer;
+            byte[] newBuffer = new byte[message.messageSize];
+            for (int i = 0; i < newBuffer.Length; i++) newBuffer[i] = message.messageBuffer[i];
+            return newBuffer;
         }
 
         protected virtual void Configure() { }
