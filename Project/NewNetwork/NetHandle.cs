@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BrainBlo.NewNetwork
 {
-    public delegate void MessageCallbackHandler(Message message);
+    public delegate void MessageCallbackHandler(NetHandle caller, Message message);
     public abstract class NetHandle
     {
         private Socket _socket; //Socket object of this handle
@@ -54,12 +54,9 @@ namespace BrainBlo.NewNetwork
                 try
                 {
                     messageSize = SocketObject.ReceiveFrom(messageBuffer, ref endPoint);
-                } catch (Exception e)
-                {
-                    Stop(true);
-                    throw e;
                 }
-                messageCallback?.Invoke(new Message(messageBuffer, messageSize, (IPEndPoint) endPoint));
+                catch (Exception) { } //Need to make a log code for this exception
+                messageCallback?.Invoke(this, new Message(messageBuffer, messageSize, (IPEndPoint) endPoint));
             }
             Stop(true);
         }
@@ -86,9 +83,9 @@ namespace BrainBlo.NewNetwork
             if (reuse) _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             SendLog(0);
         }
-        private void SendLog(int code)
+        private void SendLog(LogCode logCode)
         {
-            log?.LogCallback(new LogData(code));
+            log?.LogCallback(new LogData(logCode));
         }
         public void SetLog(ILog log)
         {
@@ -101,30 +98,19 @@ namespace BrainBlo.NewNetwork
     }
     public class LogData
     {
-        private int _code;
-        public int Code { get { return _code; } }
+        public LogCode logCode { get; set; }
         public object addData;
-        public string Message { get { return Transcript(_code); } }
-        public LogData(int code, object addData)
+        public LogData(LogCode logCode, object addData)
         {
-            _code = code;
+            this.logCode = logCode;
             this.addData = addData;
         }
-        public LogData(int code) : this(code, null) { }
-        
-
-        //Test variant
-        //Need to improve
-        private string Transcript(int code)
-        {
-            switch (code)
-            {
-                case 0:
-                    return "Debug";
-                default:
-                    return "Nothing";
-            }
-        }
+        public LogData(LogCode logCode) : this(logCode, null) { }
+    }
+    public enum LogCode
+    {
+        Debug = 0,
+        Error = 1
     }
     public interface ILog
     {
