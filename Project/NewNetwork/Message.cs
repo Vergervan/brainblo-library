@@ -5,9 +5,9 @@ namespace BrainBlo.NewNetwork
 {
     public class Message
     {
-        public byte[] messageBuffer { get; private set; }
-        public int messageSize { get; private set; }
-        public IPEndPoint point { get; private set; }
+        public byte[] messageBuffer;
+        public int messageSize;
+        public IPEndPoint point;
 
         public Message(byte[] messageBuffer, int messageSize, IPEndPoint point)
         {
