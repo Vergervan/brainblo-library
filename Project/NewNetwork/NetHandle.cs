@@ -40,7 +40,10 @@ namespace BrainBlo.NewNetwork
                 Stop(true);
                 throw new Exception("Server already is running");
             }
-            Configure(); //Configures the socket. Must be overridden by derivative class
+            try
+            {
+                Configure(); //Configures the socket. Must be overridden by derivative class
+            }catch(Exception) { Stop(true); }
             _isRunning = true;
             Task.Run(() => Run(messageCallback));
         }
@@ -62,7 +65,11 @@ namespace BrainBlo.NewNetwork
         }
         public virtual void Send(Message message) //If you need to override the Send method, then you should use base.Send at the end of the new overridden method
         {
-            _socket.SendTo(Resize(message), message.point);
+            try
+            {
+                _socket.SendTo(Resize(message), message.point);
+            }
+            catch (Exception) {}
         }
 
         private byte[] Resize(Message message)
