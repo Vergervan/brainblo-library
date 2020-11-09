@@ -1,0 +1,15 @@
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.exe.config
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.exe
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.pdb
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\BrainBlo.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\Google.Protobuf.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\System.Buffers.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\System.Memory.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\System.Numerics.Vectors.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\bin\Debug\BrainBlo.pdb
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csprojAssemblyReference.cache
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CoreCompileInputs.cache
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CopyComplete
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.exe
+C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.pdb
