@@ -110,6 +110,11 @@ namespace BrainBlo.NewNetwork
         {
             log = null;
         }
+
+        public void SetReceiveBlock(bool state)
+        {
+            _socket.Blocking = state;
+        }
     }
     public class LogData
     {
