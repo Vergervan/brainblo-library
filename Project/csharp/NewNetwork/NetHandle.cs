@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using static BrainBlo.NewNetwork.LogCode;
 
 namespace BrainBlo.NewNetwork
 {
@@ -13,8 +14,8 @@ namespace BrainBlo.NewNetwork
         private Socket _socket; //Socket object of this handle
         private IPEndPoint _curEndPoint; //Current end point which was used in bind or connect
         private bool _isRunning;
-        private ILog log;
-        private int _bufferSize = 1024;
+        private ILog log; //Object realized this interface will receive states of NetHandle
+        private int _bufferSize = 1024; //Number of allowed bytes to receive per packet
         public int BufferSize { get; set; }
         protected Socket SocketObject { get { return _socket; } set { _socket = value; }}
         public IPEndPoint CurrentEndPoint { get { return _curEndPoint; } }
@@ -32,18 +33,20 @@ namespace BrainBlo.NewNetwork
             IPAddress[] hostAddresses = Dns.GetHostAddresses(hostname); //Getting a list of addresses by hostname
             if (hostAddresses.Length != 0) //If there are more than 0 addresses in the list, then we'll use the first IP in the IPEndPoint constructor
                 _curEndPoint = new IPEndPoint(hostAddresses[0], port);
+            else
+                SendLog(ERR_CONSTRUCTOR_HOSTNAME);
         }
         public void Use(MessageCallbackHandler messageCallback)
         {
             if (_isRunning)
             {
-                Stop(true);
-                throw new Exception("Server already is running");
+                SendLog(ERR_OBJ_ALREADY_USED);
             }
             try
             {
                 Configure(); //Configures the socket. Must be overridden by derivative class
-            }catch(Exception) { Stop(true); }
+            }catch(Exception e) { SendLog(ERR_CONFIGURE, e); }
+            finally { SendLog(ST_USE); }
             _isRunning = true;
             Task.Run(() => Run(messageCallback));
         }
@@ -58,7 +61,11 @@ namespace BrainBlo.NewNetwork
                 {
                     messageSize = SocketObject.ReceiveFrom(messageBuffer, ref endPoint);
                 }
-                catch (Exception) { continue; } //Need to make a log code for this exception
+                catch (Exception e)
+                {
+                    SendLog(ERR_RECEIVE, e);
+                    continue;
+                }
                 messageCallback?.Invoke(this, new Message(messageBuffer, messageSize, (IPEndPoint) endPoint));
             }
             Stop(true);
@@ -69,7 +76,8 @@ namespace BrainBlo.NewNetwork
             {
                 _socket.SendTo(Resize(message), message.point);
             }
-            catch (Exception) {}
+            catch (Exception e) { SendLog(ERR_SEND, e); }
+            finally { SendLog(ST_SEND); }
         }
 
         private byte[] Resize(Message message)
@@ -96,11 +104,15 @@ namespace BrainBlo.NewNetwork
             _socket.Close();
             _socket.Dispose();
             if (reuse) _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            SendLog(0);
+            SendLog(ST_STOP);
         }
         private void SendLog(LogCode logCode)
         {
             log?.LogCallback(new LogData(logCode));
+        }
+        private void SendLog(LogCode logCode, object addData)
+        {
+            log?.LogCallback(new LogData(logCode, addData));
         }
         public void SetLog(ILog log)
         {
@@ -129,8 +141,19 @@ namespace BrainBlo.NewNetwork
     }
     public enum LogCode
     {
-        Debug = 0,
-        Error = 1
+        DEBUG = 0,
+        //Error codes
+        ERR_RECEIVE = 1,
+        ERR_OBJ_ALREADY_USED = 2,
+        ERR_CONSTRUCTOR_HOSTNAME = 3,
+        ERR_CONFIGURE = 4,
+        ERR_SEND = 5,
+
+        //State codes
+        ST_USE = 20,
+        ST_SEND = 21,
+        ST_STOP = 22
+
     }
     public interface ILog
     {
