@@ -13,3 +13,17 @@ C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewN
 C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CopyComplete
 C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.exe
 C:\Users\Vergervan\source\repos\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.pdb
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.exe.config
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.exe
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\NewNetworkServer.pdb
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\System.Buffers.dll
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\System.Memory.dll
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\System.Numerics.Vectors.dll
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\BrainBlo.pdb
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csprojAssemblyReference.cache
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.exe.config
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CoreCompileInputs.cache
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CopyComplete
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.exe
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.pdb
