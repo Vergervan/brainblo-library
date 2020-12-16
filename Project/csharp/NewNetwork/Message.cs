@@ -11,7 +11,8 @@ namespace BrainBlo.NewNetwork
 
         public Message(byte[] messageBuffer, int messageSize, IPEndPoint point)
         {
-            this.messageBuffer = messageBuffer;
+            this.messageBuffer = new byte[messageSize];
+            for (int i = 0; i < messageSize; i++) this.messageBuffer[i] = messageBuffer[i];
             this.messageSize = messageSize;
             this.point = point;
         }

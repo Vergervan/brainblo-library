@@ -93,20 +93,11 @@ namespace BrainBlo.NewNetwork
         {
             try
             {
-                _socket.SendTo(Resize(message), message.point);
+                _socket.SendTo(message.messageBuffer, message.point);
             }
             catch (Exception e) { SendLog(ERR_SEND, e); }
             finally { SendLog(ST_SEND); }
         }
-
-        private byte[] Resize(Message message)
-        {
-            if (message.messageBuffer.Length == message.messageSize) return message.messageBuffer;
-            byte[] newBuffer = new byte[message.messageSize];
-            for (int i = 0; i < newBuffer.Length; i++) newBuffer[i] = message.messageBuffer[i];
-            return newBuffer;
-        }
-
         protected virtual void Configure() { }
 
         public void Unuse()
@@ -140,11 +131,6 @@ namespace BrainBlo.NewNetwork
         public void ClearLog()
         {
             log = null;
-        }
-
-        public void SetReceiveBlock(bool state)
-        {
-            _socket.Blocking = state;
         }
     }
     public class LogData
