@@ -30,6 +30,7 @@ namespace NewNetworkServer
                     AddSeconds(snh);
                     await Task.Delay(1000);
                 }
+                Console.WriteLine("Stopped add seconds");
             });
             Console.WriteLine("Server was used");
             while (true)
@@ -45,39 +46,54 @@ namespace NewNetworkServer
                         {
                             var info = player.Value.playerInfo;
                             ++counter;
-                            Console.WriteLine("{0}. {1} | X: {2} | Y: {3} ", counter, info.Name, info.Position.X, info.Position.Y);
+                            Console.WriteLine("{0}. {1} | {2} | X: {3} | Y: {4}", counter, info.Name, player.Key.ToString(), info.Position.X, info.Position.Y);
                         }
                     }
                 }else if(cmd == "exit")
                 {
                     break;
+                }else if(cmd == "seconds")
+                {
+                    lock (lockObj)
+                    {
+                        foreach(var player in players)
+                        {
+                            Console.WriteLine("{0} time: {1}", player.Value.playerInfo.Name, player.Value.playerTimeout.GetSeconds());
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("That command doesn't exist");
                 }
             }
         }
         private static void AddSeconds(ServerNetHandle snh)
         {
-            lock (lockObj)
+            if (players.Count == 0) return;
+
+            foreach (var player in players.ToArray())
             {
-                foreach(var player in players)
+                Console.WriteLine("Seconds {0} Count: {1}", player.Value.playerInfo.Name, players.Count());
+                var info = player.Value.playerInfo;
+                var timeout = player.Value.playerTimeout;
+                timeout.AddSeconds(1);
+                if (timeout.GetSeconds() == 10)
                 {
-                    var info = player.Value.playerInfo;
-                    var timeout = player.Value.playerTimeout;
-                    timeout.Seconds += 1;
-                    if(timeout.Seconds == 10)
-                    {
-                        Console.WriteLine(info.Name + " timed out");
-                    }else if(timeout.Seconds == 20)
-                    {
-                        Console.WriteLine(info.Name + " kicked");
-                        players.Remove(player.Key);
-                    }
+                    Console.WriteLine(info.Name + " timed out");
+                }
+                else if (timeout.GetSeconds() == 20)
+                {
+                    Console.WriteLine(info.Name + " kicked");
+                    players.Remove(player.Key);
                 }
             }
+            
         }
 
 
 
-        private static async void MessageCallback(NetHandle caller, Message message)
+        private static void MessageCallback(NetHandle caller, Message message)
         {
             if (message == null) return;
             BBMessage bbmessage = BBMessage.Parser.ParseFrom(message.messageBuffer, 0, message.messageSize);
@@ -89,12 +105,10 @@ namespace NewNetworkServer
                     {
                         foreach (var player in players)
                         {
-                            var info = player.Value.playerInfo;
-                            if (info.Name == bbmessage.PlayerInfo.Name) goto default;
+                            if(player.Value.playerInfo.Name == bbmessage.PlayerInfo.Name) goto default;
                         }
                         players.Add(message.point, new Player { playerInfo = bbmessage.PlayerInfo, playerTimeout = new PlayerTimeout() });
                     }
-                    await Task.Delay(3000);
                     caller.Send(message);
                     Console.WriteLine("Player {0} was connected", bbmessage.PlayerInfo.Name);
                     break;
@@ -107,7 +121,7 @@ namespace NewNetworkServer
                         foreach (var player in players)
                         {
                             var info = player.Value.playerInfo;
-                            if (player.Key == message.point)
+                            if (Equals(player.Key, message.point))
                             {
                                 info.Position = bbmessage.PlayerInfo.Position;
                             }
@@ -118,8 +132,16 @@ namespace NewNetworkServer
 
                     break;
             }
-            var curPlayer = players.Where((s) => s.Key == message.point)?.FirstOrDefault().Value;
-            if (curPlayer != null) curPlayer.Value.playerTimeout.Seconds = 0;
+            lock (lockObj)
+            {
+                foreach (var player in players)
+                {
+                    if(Equals(player.Key, message.point))
+                    {
+                        player.Value.playerTimeout.ClearSeconds();
+                    }
+                }
+            }
         }
         public struct Player
         {
@@ -129,18 +151,23 @@ namespace NewNetworkServer
         public class PlayerTimeout
         {
             private int seconds;
-            public int Seconds
-            {
-                get { return seconds; }
-                set
-                {
-                    seconds = value;
-                }
-            }
             public PlayerTimeout()
             {
-                Seconds = 0;
+                seconds = 0;
             }
+            public void AddSeconds(int value)
+            {
+                seconds += value;
+            }
+            public void ClearSeconds()
+            {
+                seconds = 0;
+            }
+            public int GetSeconds()
+            {
+                return seconds;
+            }
+
         }
         public class LogManager : ILog
         {

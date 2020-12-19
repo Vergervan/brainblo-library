@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -8,7 +6,7 @@ using static BrainBlo.NewNetwork.LogCode;
 
 namespace BrainBlo.NewNetwork
 {
-    public delegate void MessageCallbackHandler(NetHandle caller, Message message);
+    public delegate void MessageCallbackHandler(NetHandle caller, DatagramPacket datagram);
     public abstract class NetHandle
     {
         private Socket _socket; //Socket object of this handle
@@ -17,7 +15,7 @@ namespace BrainBlo.NewNetwork
         private ILog log; //Object realized this interface will receive states of NetHandle
         private int _bufferSize = 1024; //Number of allowed bytes to receive per packet
         private MessageCallbackHandler _msgCallback; //Delegate contains a callback function to process message
-        private bool Blocking { get { return _socket.Blocking; } set { _socket.Blocking = value; } }
+        private protected bool Blocking { get { return _socket.Blocking; } set { _socket.Blocking = value; } }
         public int BufferSize { get; set; }
         protected Socket SocketObject { get { return _socket; } set { _socket = value; }}
         public IPEndPoint CurrentEndPoint { get { return _curEndPoint; } }
@@ -26,22 +24,24 @@ namespace BrainBlo.NewNetwork
         /// <param name="ipAddress">IP address for setting the server point</param>
         public NetHandle(IPAddress ipAddress, int port, bool blocking)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            _curEndPoint = new IPEndPoint(ipAddress, port);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp); //Creates a socket uses options for work with UDP protocol
+            _curEndPoint = new IPEndPoint(ipAddress, port); //Creates an EndPoint based on user data
             Blocking = blocking;
         }
         public NetHandle(IPAddress ipAddress, int port) : this(ipAddress, port, true) { }
         public NetHandle(int port) : this(IPAddress.Parse("127.0.0.1"), port, true) { } //In the constructor without IP, the endpoint will be localhost
-        public NetHandle(string hostname, int port, bool block)
+        public NetHandle(string hostname, int port, bool blocking)
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses(hostname); //Getting a list of addresses by hostname
-            Blocking = block;
+            Blocking = blocking;
             if (hostAddresses.Length != 0) //If there are more than 0 addresses in the list, then we'll use the first IP in the IPEndPoint constructor
                 _curEndPoint = new IPEndPoint(hostAddresses[0], port);
             else
                 SendLog(ERR_CONSTRUCTOR_HOSTNAME);
         }
         public NetHandle(string hostname, int port) : this(hostname, port, true) { }
+        private protected void Setup() { SocketObject.Bind(CurrentEndPoint); } //Binds a socket at an endpoint
+        private protected void Connect() { SocketObject.Connect(CurrentEndPoint); } //Connects a socket at an endpoint
         public void Use(MessageCallbackHandler messageCallback)
         {
             _msgCallback = messageCallback;
@@ -86,14 +86,14 @@ namespace BrainBlo.NewNetwork
                 SendLog(ERR_RECEIVE, e);
                 return;
             }
-            _msgCallback?.Invoke(this, new Message(messageBuffer, messageSize, (IPEndPoint)endPoint)); //Starts a callback function with a new message
+            _msgCallback?.Invoke(this, new DatagramPacket(messageBuffer, messageSize, (IPEndPoint)endPoint)); //Starts a callback function with a new message
         }
-
-        public virtual void Send(Message message) //If you need to override the Send method, then you should use base.Send at the end of the new overridden method
+        public void Send(DatagramPacket datagram) => Send(datagram, datagram.point); //If there is no EndPoint in the arguments, the default will be EndPoint in the DatagramPacket
+        public void Send(DatagramPacket datagram, IPEndPoint endPoint)
         {
             try
             {
-                _socket.SendTo(message.messageBuffer, message.point);
+                _socket.SendTo(datagram.messageBytes, endPoint);
             }
             catch (Exception e) { SendLog(ERR_SEND, e); }
             finally { SendLog(ST_SEND); }
