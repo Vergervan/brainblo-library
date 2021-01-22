@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BrainBlo.NewNetwork
 {
-    class EfspClient
+    public class EfspClient
     {
         private Socket _socket;
         public EfspClient()
