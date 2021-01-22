@@ -12,6 +12,7 @@ namespace BrainBlo.NewNetwork
         private Socket _socket; //Socket object of this handle
         private IPEndPoint _curEndPoint; //Current end point which was used in bind or connect
         private bool _isRunning;
+        private bool _configured;
         private ILog log; //Object realized this interface will receive states of NetHandle
         private int _bufferSize = 1024; //Number of allowed bytes to receive per packet
         private MessageCallbackHandler _msgCallback; //Delegate contains a callback function to process message
@@ -20,6 +21,7 @@ namespace BrainBlo.NewNetwork
         protected Socket SocketObject { get { return _socket; } set { _socket = value; }}
         public IPEndPoint CurrentEndPoint { get { return _curEndPoint; } }
         public bool IsRunning { get { return _isRunning; } }
+        public bool Configured { get { return _configured; } }
 
         /// <param name="ipAddress">IP address for setting the server point</param>
         public NetHandle(IPAddress ipAddress, int port, bool blocking)
@@ -29,7 +31,8 @@ namespace BrainBlo.NewNetwork
             Blocking = blocking;
         }
         public NetHandle(IPAddress ipAddress, int port) : this(ipAddress, port, true) { }
-        public NetHandle(int port) : this(IPAddress.Parse("127.0.0.1"), port, true) { } //In the constructor without IP, the endpoint will be localhost
+        public NetHandle(int port) : this(port, true) { } //In the constructor without IP, the endpoint will be localhost
+        public NetHandle(int port, bool blocking) : this(IPAddress.Parse("127.0.0.1"), port, blocking) { }
         public NetHandle(string hostname, int port, bool blocking)
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses(hostname); //Getting a list of addresses by hostname
@@ -44,6 +47,7 @@ namespace BrainBlo.NewNetwork
         private protected void Connect() { SocketObject.Connect(CurrentEndPoint); } //Connects a socket at an endpoint
         public void Use(MessageCallbackHandler messageCallback)
         {
+            if (!Configured) TryToConfigure(); 
             _msgCallback = messageCallback;
             if (!Blocking)
             { 
@@ -54,13 +58,23 @@ namespace BrainBlo.NewNetwork
             {
                 SendLog(ERR_OBJ_ALREADY_USED);
             }
+            _isRunning = true;
+            Task.Run(() => Run());
+        }
+
+        private bool TryToConfigure()
+        {
             try
             {
                 Configure(); //Configures the socket. Must be overridden by derivative class
-            }catch(Exception e) { SendLog(ERR_CONFIGURE, e); }
-            finally { SendLog(ST_USE); }
-            _isRunning = true;
-            Task.Run(() => Run());
+            }
+            catch (Exception e)
+            {
+                SendLog(ERR_CONFIGURE, e);
+                return false;
+            }
+            SendLog(ST_USE);
+            return true;
         }
 
         private void Run()
@@ -98,7 +112,7 @@ namespace BrainBlo.NewNetwork
             catch (Exception e) { SendLog(ERR_SEND, e); }
             finally { SendLog(ST_SEND); }
         }
-        protected virtual void Configure() { }
+        protected virtual void Configure() { _configured = true; } //When it overrides need to call base.Configure() at the end
 
         public void Unuse()
         {
@@ -110,6 +124,7 @@ namespace BrainBlo.NewNetwork
         }
         private void Stop(bool reuse)
         {
+            _configured = false;
             _isRunning = false;
             _socket.Close();
             _socket.Dispose();

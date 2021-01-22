@@ -1,21 +1,27 @@
-//First version of BrainBloMessage builded by protobuff
+//BBMessage v1.02
 syntax = "proto3";
 
 message BBMessage{
       message Vector3 {
             float x = 1;
-            float y= 2;
+            float y = 2;
             float z = 3;
       }
       message PlayerInfo{
             string name = 1;
             Vector3 position = 2;
             Vector3 rotation = 3;
+            repeated bool direction = 4;
       }
       enum MessageType {
          Connect = 0;
          Text = 1;
          PlayerData = 2;
+         Disconnect = 3;
+         Poll = 4;
+         Stop = 5;
+         Debug = 6;
+         Accept = 7;
       }
       MessageType messageType = 1;
       PlayerInfo playerInfo = 2;

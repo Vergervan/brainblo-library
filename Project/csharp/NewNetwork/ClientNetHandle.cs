@@ -6,11 +6,13 @@ namespace BrainBlo.NewNetwork
     {
         public ClientNetHandle(IPAddress ipAddress, int port, bool blocking) : base(ipAddress, port, blocking) { }
         public ClientNetHandle(int port) : base(port) { }
+        public ClientNetHandle(int port, bool blocking) : base(port, blocking) { }
         public ClientNetHandle(IPAddress ipAddress, int port) : base(ipAddress, port) { }
         public ClientNetHandle(string hostname, int port) : base(hostname, port) { }
         protected override void Configure()
         {
             Connect();
+            base.Configure();
         }
     }
 }

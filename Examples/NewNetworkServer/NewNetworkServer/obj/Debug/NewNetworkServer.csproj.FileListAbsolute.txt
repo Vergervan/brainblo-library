@@ -27,3 +27,4 @@ D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\o
 D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.csproj.CopyComplete
 D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.exe
 D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\obj\Debug\NewNetworkServer.pdb
+D:\GitRepositories\brainblo-library\Examples\NewNetworkServer\NewNetworkServer\bin\Debug\BrainBlo.dll

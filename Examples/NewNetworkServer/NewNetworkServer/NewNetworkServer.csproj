@@ -33,11 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BrainBlo">
-      <HintPath>..\..\..\..\Desktop\CloneRepos\brainblo-library\Project\bin\Release\BrainBlo.dll</HintPath>
+    <Reference Include="BrainBlo, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Project\csharp\bin\Release\BrainBlo.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Protobuf">
-      <HintPath>D:\UnityProjects\Project Strategy\Assets\Libs\Google.Protobuf.dll</HintPath>
+    <Reference Include="Google.Protobuf, Version=3.13.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Google.Protobuf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">

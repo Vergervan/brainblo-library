@@ -9,6 +9,7 @@ namespace BrainBlo.NewNetwork
         protected override void Configure()
         {
             Setup();
+            base.Configure();
         }
     }
 }

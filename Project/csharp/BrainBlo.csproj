@@ -44,6 +44,10 @@
   <ItemGroup>
     <Compile Include="NewNetwork\DatagramPacket.cs" />
     <Compile Include="NewNetwork\ClientNetHandle.cs" />
+    <Compile Include="NewNetwork\FileFlags.cs" />
+    <Compile Include="NewNetwork\FileReceiveEventArgs.cs" />
+    <Compile Include="NewNetwork\EfspClient.cs" />
+    <Compile Include="NewNetwork\EfspServer.cs" />
     <Compile Include="NewNetwork\NetHandle.cs" />
     <Compile Include="NewNetwork\ServerNetHandle.cs" />
     <Compile Include="Data\Serialization\AttributesClasses.cs" />
