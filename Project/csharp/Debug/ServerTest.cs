@@ -14,16 +14,6 @@ namespace BrainBlo.Network.Debug
     //TODO Need to refine
     public class ServerTest
     {
-        public class ExceptionEventArgs : EventArgs
-        {
-            public Exception exception;
-            public Socket socket;
-            public ExceptionEventArgs(Socket socket, Exception exception)
-            {
-                this.socket = socket;
-                this.exception = exception;
-            }
-        }
         public IPEndPoint address;
         private byte[] messageBuffer;
         private Socket[] sockets;
