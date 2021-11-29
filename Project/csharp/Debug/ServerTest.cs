@@ -9,9 +9,6 @@ using System.Threading;
 
 namespace BrainBlo.Network.Debug
 {
-    //Not working properly!
-    //It's better to refuse to use this!
-    //TODO Need to refine
     public class ServerTest
     {
         public IPEndPoint address;

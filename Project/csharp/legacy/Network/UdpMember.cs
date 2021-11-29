@@ -20,12 +20,12 @@ namespace BrainBlo.Network
     public class UdpMember
     {
         private Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        public Socket Socket { get { return socket; } private set { } }
+        public Socket Socket { get => socket; }
         private SendOption _sendOption = SendOption.None;
         public event EventHandler OnDispose; 
         public IPEndPoint EndPoint { get; private set; }
         private int maxBufferSize = 1024;
-        public int Available { get { return socket.Available; } private set { } }
+        public int Available { get => socket.Available; }
         private BrainBlo.Debug.Log log;
 
         //Server fields
@@ -235,8 +235,8 @@ namespace BrainBlo.Network
 
         }
 
-        public void Send(byte[] message) { Send(EndPoint, message, SendOption.None); }
-        public void Send(IPEndPoint point, byte[] message) { Send(point, message, SendOption.None); }
+        public void Send(byte[] message) => Send(EndPoint, message, SendOption.None);
+        public void Send(IPEndPoint point, byte[] message) => Send(point, message, SendOption.None);
 
         public void Send(IPEndPoint point, byte[] message, SendOption sendOption)
         {

@@ -10,8 +10,7 @@ namespace BrainBlo.Debug
     public class Log
     {
         static Log log;
-        public delegate void LogMessage(string str);
-        public event LogMessage OnGetLog;
+        public event Action<string> OnGetLog;
         private Log() { }
         public static Log Initialize()
         {
